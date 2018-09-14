@@ -25,7 +25,7 @@ git checkout -b yourbranchnamehere
 3) Upon making your edits, push onto working branch
 ```bash
 git add changedfile1 [changedfile2 ...]
-git commt -am "Description of change here"
+git commit -m "Description of change here"
 git merge  
 ```
 
