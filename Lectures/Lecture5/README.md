@@ -1,11 +1,7 @@
 ### Tidyverse Lecture
 #### Andrew Rall and Nick Lai
 
-To view the lecture material go to the following link:
+To view the lecture material and go through the exercises again just go to the following link:
 
-http://htmlpreview.github.io/
+https://andrewr0498.shinyapps.io/l5tidyverse/
 
-
-And then paste in this url:
-
-https://github.com/andrewr0498/L5-Tidyverse/blob/master/L5tidyverse.html
