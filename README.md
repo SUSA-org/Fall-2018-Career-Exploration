@@ -1,6 +1,21 @@
 # Fall 2018 Career Exploration Materials
 Collection of materials to bring new members of SUSA @ Berkeley up to speed. Hosted by and maintained by the [Statistics Undergrad Student Association (SUSA)](https://susa.berkeley.edu).
 
+Each semester in Career Exploration, we cover a wide breadth of topics. This semester, we go over:
+
+1. Intro to Datahub and Career Exploration
+2. Python
+3. R
+4. Numpy/Pandas
+5. Tidyverse
+6. Linear Regression, Validation, Fitting
+7. The Bias Variance Tradeoff, Regularization
+8. Kaggle 1 Data Cleaning/Visualization and Linear Models
+9. Kaggle 2 Decision Trees, Random Forest, Boosting
+10. Kaggle 3 Neural Networks
+11. Kaggle 4 Recap
+
+
 # Contributing to This Repository
 
 Assistance is welcome. In order to modify this repo, you first need to know your organization status. You can be
@@ -14,7 +29,7 @@ Your steps for contributing are:
 1) Clone this repo
 ```bash
 # Navigate to your directory to store SUSA repositories.
-git clone https://github.com/SUSA-org/crash-course.git
+git clone https://github.com/SUSA-org/Fall-2019-Career Exploration.git
 ```
 
 2) Create a new branch for your work
@@ -37,13 +52,13 @@ If you are having trouble pulling, pushing to the repo, then it may be because t
 
  Your steps for contributing are:
 1) Fork this repo
-2) Clone your fork (www.github.com/youracct/crash-course)
+2) Clone your fork (www.github.com/youracct/Fall-2018-Career-Exploration
 3) Set your remotes
 
 This means setting up your local version of the repo to be able to pull directly from the actual repo. This can be done by running the following command from within your local git repo:
 
 ```bash
-git remote add upstream https://github.com/SUSA-org/crash-course.git
+git remote add upstream https://github.com/SUSA-org/Fall-2018-Career-Exploration.git
 ```
 
 The link may be wrong, but otherwise it should work. Then, upon running
