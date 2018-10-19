@@ -1,0 +1,517 @@
+---
+title: "SUSA - A PrimeR"
+author: "Nicholas Lai, Danielle Sugrue"
+date: "September 6, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, cache = TRUE)
+#install.packages(c('ggplot2', 'dplyr', 'viridis', 'maps', 'knitr'), repos = 'https://cran.cnr.berkeley.edu/')
+library(ggplot2) #data visualization framework
+library(dplyr) #tidy data
+library(viridis) #Colorblind-friendly gradients
+```
+      
+__Welcome to R!__
+Let's begin with some R basics.
+
+# Syntax and Structures
+
+__Getting help with functions and features__
+
+R responds to certain commands by explaining the functions related to a subject and the features of those functions.
+Suppose you want help on the function 'factor':
+
+```{r}
+help(factor)
+```
+
+and 
+
+```{r}
+?factor
+```
+
+will direct you to R documentation on the selected function.
+
+For a feature of R that is denoted with specific characters or commands, sometimes the argument (what lies inside the parentheses) should be enclosed in single or double quotes. For example:
+
+```{r}
+help("%>%")
+```
+
+directs us to documentation in R regarding the pipe operator, represented by '%>%'.
+
+__Assignment:__
+
+In the last lecture, you were introduced to simple programming concepts in the context of the Python programming language. These concepts are general to all programming languages, but are often syntactically distinct between them.
+The creation of variables, for examples, is slightly different in R.
+The assignment operator is:
+
+-> in R. 
+
+= also works, 
+
+but is usually reserved for providing arguments for a function. Observe the results of the following assignments.
+
+```{r}
+r <- 1
+r
+r = 2
+r
+3 -> r
+r
+```
+
+
+
+Here, we have created a variable with a single value, `r` in three different ways. The arrow operator is reversible, reversing the direction of assignment.
+
+Slow down and look at the .Rmd. You can see that the code above is highlighted in gray and surrounded by the code: ```{r} on top and ``` on bottom. This gray-colored section is what is called a "chunk" in R. When you are not writing notes to yourself like we are here, and want R to perform a computation or store a variable, you enter the code inside these chunks. You can type out the ```{r} by hand or you can find the button up top that says "Insert" and then click R. This automatically gives you a chunk to type your code into. Also note that in order to see the output of your chunk, R must know you want to "run" it. So to run the chunk above, you can click on it, then go to the button that says "Run" just to the right of the "Insert" button. Click Run > Run Current Chunk to see the output.
+
+When you are in a chunk, you do not want to write explanations of your code, because you can do that out here in the white space. However, if you are typing inside a chunk but want to write a note to yourself, you can "comment out" your note using a pound, #. This tells R to ignore the note and move on. See below how you can write comments in your code.
+
+```{r}
+R <- 4 #I'm making another variable, R.
+#I'm done now.
+```
+
+# The Vector
+
+A vector is a sequence of objects (numbers, words, etc.). This sequence is indexed and ordered. It can only have one type of object in it (no numbers and words at the same time.) 
+
+In R, you create vectors like so:
+
+```{r}
+r_vector <- c(1, 2)
+r_vector
+words <- c("hello", "world")
+words
+```
+
+This is an assignment statement using the function c() which in this context can take an arbitrary number of vector arguments and whose value is a vector got by concatenating its arguments end to end.
+
+We don't need to tell r "print". We can simply write the name of the vector we want R to show us and R prints it out. 
+
+__Indexing__
+
+You can reference data stored in vectors using bracket notation:
+
+```{r}
+r_vector[1]
+r_vector[2]
+```
+
+Calling specific elements of a vector like we did above is called __indexing__. R naturally indexes vectors starting with 1 (not 0). (Think of this as the argument between analysts and algebraists on whether 0 is included in the set of the natural numbers.
+
+One interesting thing about vectors is that we can assign names to components of the vector.
+
+Suppose we want to create a vector then select the third component.
+
+```{r}
+susa <- c("is", "the", "best", "club")
+susa[3] #returns the third component
+```
+
+Then we can name the first member of the vector as "first", the second as "second", and so on. Now to retrieve the third component:
+
+```{r}
+names(susa) = c("first", "second", "third", "fourth")
+susa["third"] #returns the third component
+```
+
+Or we could return the reverse order of the vector 'susa' like this:
+
+```{r}
+susa[c("fourth", "third", "second", "first")]
+```
+
+__Character vectors__
+
+As we've begun to introduce, you can create vectors of strings in R. 
+
+Character strings are entered using either matching double (") or single (’) quotes, but are printed using double quotes (or sometimes without quotes).
+
+__Checkpoint!__
+
+Try making a vector of 3 strings using either single or double quotes. Then call it and print it out.
+
+```{r}
+#Your code here
+```
+
+__A Technical note on Vectors in R__
+
+The most fundemental building blocks of the R programming language are vectors and `NULL` (formally, the two "primatives" of R are the vector and `NULL`). That is to say, everything that is not nothing is represented as a vector. Single-valued variables are one element vectors, and the addition of those values are a consequence of normal rules of vector addition, not the usual notions of arithmetic.
+
+#The Data Frame
+
+The Data Frame object type is the most common type of data that is manipulated in R. There are many subtleties to the Data Frame object, but for now, think of them as a list of $k$ vectors of length $n$, with each vector representing a variable and each row representing an observation.
+
+Below, we create a vector and call it 'data'. We construct it from the vectors above, using them as columns, and we label the columns.
+
+```{r}
+data <- data.frame(index = r_vector, word = words)
+data
+```
+
+You can refer to the columns of a dataframe (which by themselves are vectors) using the $ operator:
+
+```{r}
+data$index
+data$word
+```
+
+You can refer to elements of a dataframe using bracket notation:
+
+```{r}
+data[1,1]
+data[1,2]
+data$index[2]
+```
+
+#Vectorization
+
+When it comes to vector arithmetic, R is very predictable because it uses element-wise arithmetic. R stores individual numbers as vectors that are length 1.
+
+For example, say we observe some temperatures in Celsius
+```{r}
+alpha <- c(6, 420, 89, 3429990, 666, -294)
+```
+and we want to convert to temperatures in Kelvin. We know the conversion from Kelvin to Celsius is:
+
+Kelvin $=$ Celsius $+ 273.15$. 
+
+The notation for adding a number to each component in a vector is very clean: 
+
+```{r}
+alpha + 273.15 #adds 273.15 to each component in alpha
+```
+
+We can multiply, divide, add and subtract vectors:
+
+```{r}
+alpha * 2 #multiplies each element of alpha by 2
+beta <- c(1, 1, 1, 8, 1, 2)
+alpha * beta #multiplies alpha by beta componentwise, like a dot product.
+beta / 2 #divides each component of beta by 2
+alpha - beta #difference of the two vectors, componentwise
+```
+
+We can also adjoin 2 vectors in order to get a longer vector:
+
+```{r}
+drinks <- c("boba", "coffee", "redbull", "tequila")
+snacks <- c("pizza", "carrots", "croissant", "granola")
+c(drinks, snacks) #gives a vector that has all elements of drinks followed by all elements of snacks
+```
+
+__Your turn__
+
+Make the vector epsilon using vector arithmetic on gamma and delta.
+
+```{r}
+gamma <- c(1, 2, 3, 4)
+delta <- c(1, 1, 1, 1)
+#epsilon <- c(0, 1, 2, 3, 6, 6, 6, 6)
+#Your code here
+#Hint: manipulate gamma and manipulate delta, then adjoin.
+```
+
+__Logical Vectors__
+
+In addition to numeric vectors and character vectors, R also allows for logical vectors (as you have may have seen in Python). 
+
+The elements of a logical vector can have the values TRUE, FALSE, and NA (for “not available”, see below). TRUE and FALSE are sometimes denoted by T and F, but if you are to name a vector or dataframe 'T' or 'F' you could overwrite these assignments.
+
+Logical vectors are generated by conditions. For example:
+
+```{r}
+x <- c(6,8,10,12)
+oski <- x > 11
+oski
+```
+
+We set 'oski' as a vector of the same length as x which returns FALSE for each value of x where the condition is not met and TRUE where it is.
+
+The logical operators are: <, <=, >, >=, (self-explanatory) and == for equal and != for inequal. 
+
+In addition, if x and y are logical expressions, then x & y is their intersection -- think AND. An example of this would be:
+
+```{r}
+x <- 5
+y <- 8
+z <- 4
+x %% 2 == 0 #checks if x is even
+x < 7 
+x %% 2 == 0 & x < 7 #checks if x is even AND less than 7
+y %% 2 == 0 & y < 7
+z %% 2 == 0 & z < 7
+```
+
+Another logical expression is |. x | y is their union -- think OR. An example of this would be:
+
+```{r}
+x <- 11
+y <- 8
+z <- 4
+x %% 2 == 0 #checks if x is even
+x < 7 
+x %% 2 == 0 | x < 7 #checks if x is even OR less than 7
+y %% 2 == 0 | y < 7
+z %% 2 == 0 | z < 7
+```
+
+One more thing -- ! means negation. So !x means not x.
+
+```{r}
+x <- 4
+x != 5
+x != 4
+```
+
+Logical vectors may be used in ordinary arithmetic, in which case they are 'coerced' into numeric vectors, FALSE becoming 0 and TRUE becoming 1. More on this later.
+
+__Your Turn__
+
+Create a vector w of the form (T, F, T) using logical statements.
+
+```{r}
+#Your code here
+```
+
+The paste() function takes an arbitrary number of arguments and concatenates them one by one into a character vector. 
+
+Any non-string values given among the arguments are coerced into strings. The arguments are by default separated in the result by a single blank character, but this can be changed by the named argument, sep=string, which changes it to string, possibly empty.
+
+For example:
+
+```{r}
+paste(c("X","Y"), 1:10) #natural spacing
+paste(c("X","Y"), 1:10, sep="")
+paste(c("X","Y"), 1:10, sep=" space ")
+```
+
+Note that since the vector ("X","Y") was not of length 10, it was __recycled__ (or repeated) 5 times in order to match the sequence 1:10. 
+
+##Atomicity of Vectors
+
+Vectors are atomic structures (meaning their components must all be of the same type). 
+
+```{r}
+vector1 <- c(TRUE, FALSE, TRUE)
+vector2 <- c("a", "b", "c")
+vector3 <- c(3, 4, 5)
+typeof(vector1) #tells us about the type of the vector, or the type of the elements in the vector
+typeof(vector2)
+typeof(vector3)
+```
+
+If you mix data types, vectors undergo coercion. So be careful to only enter values of the same datatype when making a vector. 
+What happens if we mix logical components with numeric ones?
+What happens if we mix character components with numeric ones?
+
+```{r}
+v <- c(TRUE, FALSE, 56, 72)
+typeof(v)
+v
+w <- c("bone", "apple", "tea", 4, 2, 0)
+typeof(w)
+w
+```
+
+__Missing values__
+
+Sometimes, a vector will have some unknown values. For example, perhaps you give out a survey and some responders leave certain boxes blank. You're not going to fill in the answers for them, so you can enter them as “not available” or a “missing value”. In statistics, it is fairly common to call these values NA (not available).
+
+The function is.na() gives a logical vector of the same size of the vector it is applied to with value TRUE if the corresponding element in x is NA.
+
+```{r}
+z <- c("RIP", "Harambe", NA)
+is.na(z)
+is.na(0/0) #zero divided by zero is automatically an NA value in R
+is.na(Inf - Inf) #infinity subtracted by itself is automatically an NA value in R
+```
+
+#Graphing in R
+
+One of the most common uses of R is to generate beautiful data visualizations. In fact, many professional data journalism outfits such as FiveThirtyEight and The New York Times use R to create their graphics. 
+Here's one of the simplest things you can do in R, without the ggplot library:
+Suppose I have data from a survey of 15 SUSA members' heights and weights.
+```{r}
+heights <- c(70, 50, 66, 54, 72, 60, 62, 55, 69, 69, 55, 58, 59, 61, 63)
+weights <- c(198, 100, 131, 100, 146, 170, 122, 130, 160, 166, 111, 112, 157, 113, 189)
+plot(weights, heights)
+```
+
+Note that ggplot2, which we will introduce soon, can achieve a nicer looking graphL
+
+```{r}
+dt <- data.frame("height" = heights, "weight" = weights)
+ggplot(data = dt, aes(x = height, y = weight)) + geom_point()
+```
+
+__Your turn__
+
+The plot function takes 2 inputs, x and y in that order. Try creating 2 vectors x and y of the same length and plotting them.
+```{r}
+#Your code here
+```
+
+#ggplot2
+We've seen base R plotting functions, but a more powerful framework for data visualization is the ggplot2 package.
+
+##The structure of a ggplot
+Imagine you were to make a graph in real life. How would you go about it?
+A good first move would be to get your canvas ready, and get your data on hand.
+Every ggplot begins with a call of the ggplot() function where you specify the data your plot will be using. This sets the canvas of your graphs and prepares your data close at hand.
+We will be using a dataframe built into R, mtcars, which has a variety of information about some car makes.
+```{r}
+str(mtcars)
+ggplot(data = mtcars, aes(x = mpg, y = hp))
+```
+Now that we have a suitable canvas, all that remains is to draw our graph.
+The aesthetic mappings specify which columns of your data frame should be associated with each axis. To add to a ggplot, simply use the + operator and a geom function of your choice. No need to specify the rules by which to plot your graph, as your data is already on hand.
+```{r}
+ggplot(data = mtcars, aes(x = mpg, y = hp)) + geom_point()
+ggplot(data = mtcars, aes(x = mpg)) + geom_histogram()
+```
+
+##A Technical Note on the Aesthetic Mappings
+The aesthetic mappings take more inputs than just the appropriate columns of your data. They can be used inside geom functions to specify aspects like colour, fill, groupings, etc. 
+
+__Your Turn__
+The geom function for making a density curve is geom_density(). Plot a density curve of MPG in mtcars.
+```{r}
+#Your code here
+```
+
+#Challenge Section
+
+One of the most common uses of R is to generate beautiful data visualizations. In fact, many professional data journalism outfits such as FiveThirtyEight and The New York Times use R to create their graphics. 
+Today, we will be creating a graph of the United States by county. This may sound like a daunting first task, but because of the wonderful packages that the R community has produced, it will become clear that doing so is quite managable. 
+
+##Getting the Map
+
+The ggplot2 R package is one of the most powerful graphical tools available in R. One of the functions of the package allows us to extract map data for the US and for counties of the US.
+```{r map}
+usa <- map_data("usa")
+counties <- map_data("county")
+```
+What exactly did we just do? Let's inspect the structure of the data we just imported.
+```{r counties}
+head(counties)
+```
+This data frame is a map that associates each point on a grid with a certain state ('region') and a certain county ('subregion'). This will be useful when plotting a visual representation stratified by state or county.
+We can read in census data using functions in R, and using the head function, we can inspect the data's structure. 
+```{r data}
+county_data <- read.csv("acs2015_county_data.csv")
+head(county_data)
+```
+In order to plot the data on a map, we need to merge the data with the map data. Notice that the county data we just imported capitalizes the names of the counties and states. In order to associate the data with our map properly, we need to use the 'to_lower()' function to put the names in lowercase.
+```{r cleaning}
+county_data$County <- sapply(county_data$County, tolower)
+#in order to use the inner_join function to merge data by columns, the two columns of interest have to have the same name.
+colnames(county_data)[colnames(county_data)=="County"] <- "subregion"
+#After we ensure that, inner join will associate the values of the census data with each point on our map based on which subregion is mapped onto each point.
+usa_county_data <- inner_join(counties, county_data, by = "subregion")
+#View the data to gain an appropriate intuition of the function
+head(usa_county_data)
+```
+After we have the merged data, we are ready to plot!
+The ggplot plotting framework works with layers. Observe how the plot changes as we incorportate more elements below:
+```{r}
+#Only the BASEics
+ggplot(data = usa, aes(x=long, y = lat, group = group)) 
+#Gray map of the US
+ggplot(data = usa, aes(x=long, y = lat, group = group)) + geom_polygon(fill = 'gray')
+#Rescaling for visual pleasure
+ggplot(data = usa, aes(x=long, y = lat, group = group)) + geom_polygon(fill = 'gray')+
+  coord_fixed(1.3)
+#Filling in each county
+ggplot(data = usa, aes(x=long, y = lat, group = group)) + geom_polygon(fill = 'gray')+
+  coord_fixed(1.3) + geom_polygon(data = usa_county_data, aes(fill = White), color = "white")
+```
+'geom_polygon' will fill in a portion of the ggplot grid with a solid shape. What is filled in is determined by the maps we extracted and created with the above processes (the coordinates columns of the data, to be precise.)
+```{r plotting}
+#Using a pleasing gradient
+ggplot(data = usa, aes(x=long, y = lat, group = group)) + geom_polygon(fill = 'gray')+
+  coord_fixed(1.3) + geom_polygon(data = usa_county_data, aes(fill = White), color = "white") + scale_fill_viridis(option="magma")
+```
+
+'magma' is only one option that the 'viridis' package takes. Try 'viridis' for example for a different gradient.
+
+__Your Turn__
+Say you are interested in the percentage of people in a given county that are citizens. To get this data, divide the column of 'Citizen' with the column of 'TotalPop'.
+
+```{r}
+usa_county_data$prop_citizen <- usa_county_data$Citizen/usa_county_data$TotalPop
+head(usa_county_data) 
+```
+
+Say you are interested in total number of white people in a county. How would you transform your data to get those values?
+
+```{r}
+#Your code here
+```
+
+Now, plot one of the two above new variables to the US county map like above.
+
+```{r}
+#Your code here
+```
+
+Look back at the usa_county_data object. It has a very redundant column as a quirk of our 'inner.join'. Which columns are redundant?
+
+We can remove it:
+
+```{r}
+#usa_county_data$col_name <- NULL
+```
+
+In a similar way to which we can visualize the county_data on the county level, we can visualize it on a state level. 
+Aggregate a variable of the data by state and join that to a map_data object, and plot that variable on the state level using a modification of the above method.
+```{r}
+#Your code here
+```
+
+#Lemma: Formatting Equations with LaTex Syntax
+
+Let's derive the quadratic formula: $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+
+We start with a quadratic equation and look for its roots: $$ax^2 + bx + c = 0$$
+
+Now multiply both sides by $4a$: 
+
+Your code here (surround it with dollar signs)
+
+Then add $b^2 - 4ac$ to both sides:
+
+Your code here (surround it with dollar signs)
+
+Then factor the left hand side into a square:
+
+$$(2ax + b)^2 = b^2 - 4ac$$
+
+Then take the square root of each side:
+
+Hint: $\pm$ gives a plus or minus sign, $\sqrt{w}$ gives square root
+
+Your code here (surround it with dollar signs)
+
+Then subtract $b$ from each side:
+
+$$2ax = -b \pm \sqrt{b^2 - 4ac}$$
+
+Then solve for x:
+
+Hint: $\frac{u}{v}$ gives a pretty fraction.
+
+Your code here (surround it with dollar signs)
+
+And you're done!
