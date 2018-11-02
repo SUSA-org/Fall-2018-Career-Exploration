@@ -1,0 +1,387 @@
+---
+title: Introduction to Command-line Shells
+subtitle: "Part 0: Basic Usage and Git" 
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy." 
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = -1, results = "markup")
+```
+
+# Introduction
+## Foreword
+
+For most of your life so far, you have probably been an extensive user of computer desktop interfaces. In the olden days, computer-literate individuals would literally type commands into a **c**ommand-**l**ine **i**nterface (**CLI**) to tell their computers what to do, from running programs to copying files. However, with the advent of the mouse and **G**raphical **U**ser **I**nterfaces (**GUI**s) in the 80s, most computer users do not feel the need to use a command-line interface to use their computer. Still, even though a GUI is perfectly situated for most computational tasks, there are thousands of use cases where a command-line interface does as well as (or even outperforms!) the more popular desktop interfaces. **In this tutorial, we will go over how to use your computer's terminal to view, manipulate, and run files, as well as how to use Git, a very popular version control program.**  
+
+## Command-line Interfaces
+
+A *command-line interface (CLI)* is a computer application that allows you to run commands of some sort, line-by-line. If you're familiar with RStudio, the console pane at the bottom of the GUI allows you to enter R commands, one at a time, to run computations and analysis. This interface can be used instead of running R notebooks or scripts. As another example, if you've ever used SQL, you may recall writing SQL statements line-by-line to pull and manipulate data in databases. These two examples are quite limited compared to the powerful CLI we will be learning about in this tutorial: **Bash**. 
+
+Bash (**B**ourne-**a**gain **SH**ell) is a CLI that allows you to use your computer's operating system to perform computational tasks. A **shell** is simply an application that allows you to use your computer's operating system. The distinction that Bash has in comparison to the shells you are probably familiar with (e.g. the Mac desktop interface) is that Bash is a CLI, not a GUI. While it has a steeper learning curve than the GUI equivilant, it also allows you to quickly perform or even automate tasks like renaming files, installing applications, and more, all from the comfort of your keyboard. 
+
+### A quick example
+
+Just to give you an idea of what using a CLI is like, here is an example of a typical command in Bash:
+```{bash, echo = T, eval = F}
+rm -rf useless_folder
+```
+
+The command used here is `rm`, which stands for *remove*. `rm` will delete files, and even **directories** (another name for folders) if specified. The `-rf` **option argument** tells the `rm` program to delete not just the directory `useless_folder`, but also the files and subdirectories inside of it *recursively* (the `-r` part), and to *force* the deletion, even if the files are usually protected (the `-f` part). Finally, the last part of the command tells the program what to target - in this case, `useless_folder`.
+
+The `-r` and `-f` option arguments above can be either written as `-r -f` or `-rf`, as a shortcut. These types of option arguments are very common in Bash. Usually, `-X` is the shortcut for the longer, but more readable, option `--Xample` *(notice the single vs double dash)*.
+
+One last consideration to take when using Bash - **EVERYTHING is a file**. Even a folder/directory is actually just a file pointing to a collection of other files. Programs are just files that you can run to perform tasks. Also, while file suffixes (e.g. `.txt`, `.pdf`, `.jpeg`, etc.) matter in traditional desktop environments, in CLIs, the names of the files do not have to contain the correct suffix. Rather, the program used to interpret the file can do anything from attempt to read it as a text file to run it as a program, depending on which command you use. Finally, Bash is traditionally written in all lowercase. So, you will notice that all commands and programs are given by lowercase words or abbreviations.
+
+## Installing a CLI (Windows-only)
+
+If you use a Mac or Linux operating system, you're in luck! Your CLI already comes installed in the form of the *Terminal* application. However, Windows by default has only a very primative CLI that doesn't have the full set of features that come with Bash. So, you will have to install a *console emulator*. There are tons of these applications available online, but in this tutorial, we will recommend [cmder](http://cmder.net/), a lightweight console emulator that includes Git (a program we will learn to use later) by default. If you have a Windows machine, download the *full version* of cmder [here](https://github.com/cmderdev/cmder/releases/download/v1.3.4/cmder.zip). Then, unzip the downloaded file and follow the installation instructions to install cmder onto your computer.
+
+# Basic Commands
+
+Now that you have a terminal to use Bash on your computer, let's dive into what you can do with it! 
+
+*Note: for the rest of this tutorial, the examples will be run in a demo folder called `cl0-ws`*
+```{bash, echo = F}
+rm -rf cl0-ws
+```
+```{bash, echo = F}
+mkdir -p cl0-ws
+cd cl0-ws
+echo "Hello world!" > test_file.txt
+echo "This is not the same as test_file.txt" > test_file.text
+echo "geom_love is the future. We don't even need file suffixes where we're going!" > file3
+mkdir susa-docs
+echo "SUSA's colors are pink and blue." > susa-docs/susa-colors.txt
+echo "SUSA endorses both R and Python, but R is slightly better for statistics and data visualization, not to mention machine learning and data science." > susa-docs/susa-thoughts.txt
+```
+
+
+## Navigating Files & Directories
+
+The most basic commands in Bash involve navigating through your computer's filesystem. 
+
+### `pwd`, `ls`, `mkdir`
+First up, we have `pwd`. Before you began navigating your filesystem, it would be helpful to see which directory you're currently in, right? `pwd`, which stands for *print working directory* prints out the *path* (more on that later) to your current location. Let's see what the name and path of our current directory is in this tutorial.
+```{bash}
+cd cl0-ws
+pwd
+```
+
+Next, it would be useful to see what files are in our current directory (in this case, `cl0-ws`). To do this, we use `ls`, which stands for *list*. `ls` will simply print the names of the files in your current directory, or the files in the specified directory if one is given. By default, it will list the files in your current directory.
+```{bash}
+cd cl0-ws
+ls
+```
+
+We can also use the `ls <directory>` syntax to print the names of files within another directory. In this case, we use `ls` to list the files in the `susa-docs` subdirectory of `cl0-ws`. 
+```{bash}
+cd cl0-ws
+ls susa-docs
+```
+
+### `cd`, Paths
+
+Next, we're going to learn how to navigate through your filesystem with `cd`. `cd` stands for *change directory*, and allows you to specify **paths**, which are directions on how to access a particular file or directory.
+
+In Bash, a path from the current directory you are in is notated as `folder_1/subfolder_b/myRscript.R`. By default, paths are **relative** - that is, interpreted as starting from the directory you are currently working in. There are a couple of useful prefixes for specifying relative paths. 
+
+The first is `.`, which is the location of the current directory. You can verify that `ls .` and `ls` have the same output. 
+
+The second is `..`, which is the location of the parent directory of the current directory. For example, if you wanted to navigate up from your current directory and then list the files in your new location, you can try:
+```{bash}
+cd cl0-ws
+cd ..
+ls
+```
+
+You can also specify **absolute** paths, in one of two ways. 
+
+Firstly, you can write a path starting from the **root directory**, which is the 'highest' folder you can go to in your computer's filesystem, by starting the path with `/`. Let's see what's inside my root directory using `ls`. 
+```{bash}
+cd cl0-ws
+ls /
+```
+
+The root contains some of the inner workings of your computer, so do not fret if you don't recognize the folders inside of it. 
+
+Alternatively, you can write a path starting from the **home directory**, which is probably a much more convenient location for you to start with, by starting the path with `~/`. How would you view the path from the root to your home directory?
+```{bash}
+cd cl0-ws
+pwd ~
+```
+
+You can use `cd` to go directly to any relative or absolute path you give as an argument. Keep note of the differences between the default path, `.`, `..`, `/`, and `~`, and you will be a happy filesystem navigator!
+
+## Making and Manipulating Files
+Next, we will learn how to create files, and then out to copy them or move them around, all via a command-line interface.
+
+### `touch`, `cat`, `echo`
+`touch` is the quickest way to make and name an empty file. Simply use:
+```{bash}
+cd cl0-ws
+touch top_secret_susa_doc
+```
+
+If we use `ls` we can verify that we made a new file:
+```{bash}
+cd cl0-ws
+ls
+```
+
+We can use the `cat` command to print out the contents of a file.
+```{bash}
+cd cl0-ws
+cat test_file.txt
+```
+
+However, if we try `cat top_secret_susa_doc`, we will find that our new file is still empty! This is where the true nature of `cat` comes in... You see, `cat` stands for *concatenate*. We can use a Bash technique called **piping** to print out text in one file and concatenate it to another. Let's try this technique to fill up our new document!
+```{bash}
+cd cl0-ws
+cat susa-docs/susa-thoughts.txt > top_secret_susa_doc
+cat top_secret_susa_doc
+```
+In the above code, the `>` operator *pipes* the output of the `cat susa-docs/susa-thoughts.txt` command into the top_secret_susa_doc. 
+
+What if we want to replace the contents of `top_secret_susa_doc` with our own top-secret text? This is where the `echo` command comes in. By default, `echo` will just print out any string you give as its argument. However, with piping, we can use it to quickly overwrite files with strings.
+```{bash}
+cd cl0-ws
+echo "SUSA used to be called USA, but was changed for federal political reasons..." > top_secret_susa_doc
+cat top_secret_susa_doc
+```
+
+As you can see, our old text was overwritten by the string we told Bash to `echo`. 
+
+### `rm`, `mv`, `cp`
+Now that you've gotten making and editing new files down, let's talk about file manipulation. You learned how to use `rm`, the *remove* program, above, but what about cutting/copying and pasting files? In a GUI, this is just a drag-and-drop or keyboard shortcut procedure, but let's see how to do it in a CLI.
+
+The `mv` command stands for *move*, and is Bash's way of cutting-and-pasting files, with the syntax `mv <file> <target-dir>`. Let's try to move a file from our `susa-docs` subdirectory into our main directory:
+```{bash}
+cd cl0-ws
+mv susa-docs/susa-colors.txt .
+ls
+```
+(*Notice the use of `.` to indicate the current folder as the destination*)
+
+An alternative syntax for `mv` is `mv -t <target-dir> <file>`. Here, we see another *option argument*. Recall from the beginning of the tutorial that *option arguments* are parts of a Bash command denoted by a dash. In this case, the option argument is `-t`, which stands for target, and we supply the output directory as part of the option argument's operands. 
+
+One useful trick with `mv` is that it also serves as Bash's renaming function. Instead of supplying a destination directory, we supply a new name for the file. Let's rename the `file3` file something more interesting:
+```{bash}
+cd cl0-ws
+mv file3 cx-is-awesome.txt
+ls
+```
+
+A similar command is the `cp` command, which stands for *copy*. Again, the syntax is `cp <file> <target-dir>`. Let's be nice to our `susa-docs` directory and give it back what we stole from it. In fact, let's copy a few other files over - the `cp` command (and the `mv` command) can take multiple files to paste in the target directory.
+```{bash}
+cd cl0-ws
+cp cx-is-awesome.txt susa-colors.txt top_secret_susa_doc susa-docs/ 
+ls susa-docs
+```
+
+As a quick quiz, can you think of an alternative way to write the `cp` command so that we specify the target directory first, and not as the last argument?
+
+## Helpful Commands
+
+### `man`, `head`, `sudo`
+Finally, we're going to end with a couple of quick commands that should make it easy for you to get more comfortable your CLI.
+
+The `man` (*manual*) command gives you the a help manual on for any command that Bash knows. Let's use `man` to answer the quiz question above.
+```{bash}
+cd cl0-ws
+man cp
+```
+
+Woah! That was a really big output. How could we see just the first few lines of the man page instead? There's another kind of piping in Bash, the vertical bar pipe (`|`), which you can type by pressing `SHIFT-\` on your keyboard. Unlike the `>` pipe above, which writes the output of one command into a file, the `|` is designed to take the output of a command and pipe it into the input of another command. 
+
+The `head` command will print just the first 10 lines of what's given to it. It's commonly used to view just the beginning of very long text files, but this time let's use it to print the first 10 lines of the `cp` man page.
+```{bash}
+cd cl0-ws
+man cp | head
+```
+
+Neat! As you can see, you can use the `-t` optional argument syntax for `cp` too.
+
+Finally, you may find yourself in situations where you need administrative privileges to run a command. In such cases, use the `sudo`, or *super user*, command. For example, if you wanted to copy files that are usually restricted, you could run `sudo cp super_duper_secret_file ../`. Be very careful when using the `sudo` command, because protected operations are usually sanctioned as such for a reason. You may end up breaking your computer forever if you use `sudo` on commands and files you aren't supposed to touch.
+
+### `history`, `grep`
+
+The last couple of command we are going to learn have to do with finding things. The `history` command prints out all the commands you've typed since the last time you turned on your computer. Let's remind ourselves which commands we've learned about so far!
+```{bash}
+cd cl0-ws
+history
+```
+
+Now, if you have a lot of history, it's annoying to manually scroll up through them to remind yourself of some syntax. Fortunately, the `grep` command has your back! `grep`, which (rather obnoxiously) stands for *globally search a regular expression and print*, is a command that is usually used to search for keywords within text files. Today, however, let's use the piping operator we learned above to remind ourselves of all the different `mv` syntaxes we learned.
+```{bash, eval = F}
+cd cl0-ws
+history | grep mv
+```
+
+You've now learned a ton of different commands for your CLI, and you're ready to learn a bunch more! Feel free to visit the links in the [Additional Readings](#additional-readings) section to learn more. This concludes the Bash portion of the workshop, but let's move on to learning one of the most popular programs used in CLI - Git.
+
+# Git
+
+## What is Git?
+
+If you've used Google Docs before, you're already familiar with a version control system for editing files. In Google Docs, you can go back to the history of versions for a document, and easily restore a prior version if you make a lot of unwanted changes. Google Docs even tells you who edited which portions of each version, so you can contact the right people for large documents. 
+
+Git is also a version control program, but is much older and more versatile. Whereas Google Docs stores version history for specific documents, Git stores version history for entire projects (known as Git **repositories**). Unlike Google Docs, Git allows you to make **branches**, or named working versions of a project, and you can quickly switch between them. This *branching* feature is illustrated by the Git logo: ![](git-logo.png)
+
+### A quick example
+
+To give you a more concrete idea of what branching is used for, here's an illustrative example. 
+
+Suppose you and your friend are working on a state-of-the-art Kaggle model. You have been working with your friend to make a basic model, storing it in the default Git branch, `master`. Now, you and your friend have a couple of different ideas on how to improve it further. You both want to start working on making a better model, and then compare which prototype performs better, but you don't want to get in the way of each other's work. So, you make a branch named `xg_boost`, and your friend makes a branch named `clockwork_rnn`. That way, both of you can independently work off of the same base code, without overwriting or affecting each other's branches. 
+
+If your model proves to be superior, you can merge your `xg_boost` branch into the `master` branch, and you can both work off of your new model. Alternatively, if your friend's model performs better, they can merge their `clockwork_rnn` branch into the `master` branch and you and your friend can work on that new model together. As one last possibility, suppose neither the `xg_boost` model nor the `clockwork_rnn` model outperform the model in the `master` branch. Then, you can both easily switch back to the `master` branch with a single command, and try new ideas without skipping a beat. This is the value of Git, especially for complex or group projects.
+
+## Git vs GitHub
+
+`git` is the command-line program that allows you to make use of the Git version control system. However, Git operates by default locally - that is, just offline on your computer. In order to actually share your code with others, you have to use a service like **Github** or **Bitbucket**. They both work very similarily, and basically allow you to upload your code to an online *repository* in the cloud. 
+
+The standard workflow is to work on your code locally, using `git` for version control, but when you want to **push** the latest functioning version of your code, you can upload it to the cloud maintained by Github/Bitbucket. Then, even friends who aren't located nearby geographically can **pull** your online code to their local computers, and work on your project remotely, pushing their own updates when needed. 
+
+## Installing Git
+
+You can install Git by visiting this link to [Downloads page](https://git-scm.com/downloads) of the official [Git website](http://git-scm.com).
+
+## Using Git Locally
+
+We are now going to dive into how to use `git`! Don't worry, there are just a few basic commands, and once you get used to the workflow, it will feel painless and natural. 
+
+*Note: for this section of the tutorial, the examples will be run in a demo repository in `cl0-ws` called `demo-repo`*
+
+### `git init`
+
+First, we're going to learn how to actually make a **Git repository**. A *repository* (aka *repo*) is essentially a folder/directory that you specially indicate as being attached to a version control system. First, let's make a demo folder and copy some files into it:
+```{bash}
+cd cl0-ws
+mkdir demo-repo
+cp -r susa-docs/* demo-repo/
+ls demo-repo
+```
+
+To initialize a directory as a repo, navigate to the folder in question and run:
+```{bash}
+cd cl0-ws
+cd demo-repo
+git init
+```
+
+### `git add` and `git commit`
+
+Now, let's record our files into the version control system. `git add` will tell Git to *track* your files, or prime them to be "stamped" as a major step in development later in the `git commit` step. You usually just `add` the files that have changed since the last `commit`, or just the files that you want to track. Alternatively, you can `add` all the files that are in your repo with the `-A` option argument. Let's add all our files to be tracked.
+```{bash}
+cd cl0-ws/demo-repo
+git add -A
+```
+
+`git commit` is then used to make a named record of your work so far. All commits require a message to be attached, to describe what's changed since the last version. If you simply run `git commit`, Git will automatically open up your default command-line text editor to force you to enter a message, which can be a pain to work with. For quick messages, you can use the `-m` option command to give a message as a string. Let's commit our newly `add`ed files:
+```{bash}
+cd cl0-ws/demo-repo
+git commit -m "My first commit!"
+```
+
+As you can see, we've successfully tracked and committed the 4 files that we added to the empty repo.
+
+### `git branch` and `git merge`
+Now, we're going to give a brief illustration of how to use Git's branching mechanism. Let's make a new *branch*, edit a file, and then *merge* that branch back into the `master` branch.
+
+To open a new Git branch, use the `git branch <new_branch_name` syntax. Let's make a branch called `demo_branch`. 
+```{bash}
+cd cl0-ws/demo-repo
+git branch demo_branch
+```
+
+If you run `git branch` without any arguments, Git will display all the branches currently associated with this repo. What are all the branches in our case? 
+```{bash}
+cd cl0-ws/demo-repo
+git branch
+```
+Notice the `*` next to the `master` branch - this indicates we are still on the `master` branch.
+
+Let's make a change in our `demo_branch` branch, and then `merge` those changes back into the `master` branch. First, we have to actually switch to our `demo_branch` branch. To do this, we use the `git checkout` command. 
+```{bash}
+cd cl0-ws/demo-repo
+git checkout demo_branch
+git branch
+```
+(*Alternatively, we could've used the `-b` option argument for the branch command, which creates and immediately switches to a new branch. In this case, the full command would have read `git branch -b demo_branch`*)
+
+Now, we're ready to make some changes without it affecting our `master` branch. Let's rewrite the contents of `cx-is-awesome.txt`.
+```{bash}
+cd cl0-ws/demo-repo
+echo "Career Exploration makes OP statisticians, data scientists, and machine learners :D" > cx-is-awesome.txt 
+```
+
+Let's `add` and `commit` our changes. A quick shortcut to do this is the `-a` option argument of `git commit`, which automatically `add`s all changed files, and then commits them.
+```{bash}
+cd cl0-ws/demo-repo
+git commit -am "Made a few changes for this demo"
+```
+
+If we `cat` the `cx-is-awesome.txt` file in our `demo_branch`, we see that it has in fact be overwritten:
+```{bash}
+cd cl0-ws/demo-repo
+cat cx-is-awesome.txt
+```
+
+However, if we switch back to the `master` branch, we find that our old version of `cx-is-awesome.txt` is still available once we're on that branch.
+```{bash}
+cd cl0-ws/demo-repo
+git checkout master
+cat cx-is-awesome.txt
+```
+
+Suppose we're satisfied with our work in the `demo_branch`, and now want to officiate it by merging it back with the `master` branch. To do this, we use the `git merge` command. The syntax `git merge <branch>` will merge the `<branch>` branch with the branch you are currently on. Right now, we're on the master branch (*Quiz: how do we know that we are currently on `master`? How can we double-check which branch we are on?*), so we run the following command to merge our `demo_branch` with the `master` branch:
+```{bash}
+cd cl0-ws/demo-repo
+git merge demo_branch
+```
+(*Notice the `Fast-forward` description to this merge - there are several types of merges Git uses, and this one is the most basic - we simply fast-forward to the changes of the `demo_branch`. You can learn about the other types of merges in the [section below](#additional_readings).*)
+
+## Using Git Remotely
+
+Now that we've covered the basics of how Git works locally, let's make use of it's cloud-interfacing abilities. First, let's `push` our local `demo-repo` `master` branch to Github. We must first make an empty **Github** remote repository on [the Github website](github.com), then `push` our local repo onto it. I have already made an [empty Github repository](https://github.com/SUSA-org/git-demo) for the purposes of this tutorial called `git-demo`. 
+
+### `git push`
+`git push` has a very simple syntax for pushing local repositories to remote repositories - `git push <remote_repo_url> <local_branch_name>` will push the `<local_branch_name>` branch into the remote repository at `<remote_repo_url>`. (By default, if no `<local_branch_name>` is given, the default is the current branch) Let's push our `demo-repo`'s `master` branch into the remote `git-demo` repository:
+```{bash, eval = F}
+cd cl0-ws/demo-repo
+git push https://github.com/SUSA-org/git-demo.git master
+```
+
+There is also a command to name shorthand aliases for remote repo URLs called `git remote`, which you can read more about [below](#additional_readings).
+
+### `git pull`
+Finally, we're going to cover the other command for working with remote repositories, `git pull`. To `fetch` and automatically `merge` any changes in the remote repo that aren't yet in your local repo, use the syntax `git pull <remote_repo_url> <remote_branch_name>`. (Again, by default if no `<remote_branch_name>` is specified, Git will try to guess which branch is associated with your current branch). Let's `pull` from our remote repository in case any changes have been made to it that we aren't aware of locally.
+```{bash, eval = F}
+cd cl0-ws/demo-repo
+git pull https://github.com/SUSA-org/git-demo.git master
+```
+
+### `git clone`
+An alternative to making a local repo and then pulling remote files to it is to `clone` a remote repo directly as a new local repo on your computer. The `git clone` syntax is as follows: `git clone <remote_repo_url> <local_repo_name>`. (By default, if no `<local_repo_name>` is specified, Git will give the local repo the same name as the remote repo).
+
+To `clone` all of the [SUSA crash-course tutorials](https://github.com/SUSA-org/crash-course) (including this one!) to your computer, run the following command in whichever directory you want to store the repo in:
+```{bash, eval = F}
+cd cl0-ws
+git clone https://github.com/SUSA-org/crash-course.git
+```
+
+This concludes our Git tutorial! Stay tuned for more tutorials and workshops, all part of the **SUSA Crash Course** initative.
+
+# Additional Readings
+- For more information on the command-line shell, visit the [Linux Command Line Guide](http://linuxcommand.org/lc3_learning_the_shell.php)
+- For more information on how to use Git, visit the official [Pro Git Book](https://git-scm.com/book/en/v2)
+- There is also a Git quick-guide cheatsheet, available [here](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf)
+
+```{bash, echo = F}
+rm -rf cl0-ws
+```

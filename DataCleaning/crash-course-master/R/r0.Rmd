@@ -1,0 +1,145 @@
+---
+title: Introduction to R
+subtitle: "Part 0: Installing R and RStudio" 
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = T)
+```
+
+# Introduction
+
+In this mini-tutorial, you will learn how to install [R](https://www.r-project.org/) (a statistical programming language) and [RStudio](https://rstudio.com) (an *integrated development environment (IDE)* for R programming). This tutorial is the prerequisite for **r1**, SUSA's crash course on R for data science and statistics.
+
+## What is R?
+
+Before we begin installing R, *what is R anyway*? 
+
+The first thing to notice about R is that it's **open-source** - that is, R is free to use and anyone can see how it was made! The free and open nature of R led to the formation of the **R community**, a constantly-expanding network of individuals who contribute ideas and code to R and all of its packages, free-of-charge. But more on what R is actually used for...
+
+#### R is a **programming language**.
+
+Just like Python, R is a programming language. Its **syntax** (aka specific language structure) is a little different than Python's, but a lot of it is identical! For example, in both languages, *printing* a string to the console is done via the same command:
+```{python}
+print("Hello SUSA!") ## Printing in Python
+```
+```{r}
+print("Hello SUSA!") ## Printing in R
+```
+
+R is the name of both the language for computational tasks as well as the **runtime environment** that actually reads *commands* and *scripts* written in the R language to execute tasks. (Note: A **command** is generally used to describe an interactive style of programming, where you enter commands line-by-line in a console. An ordered list of commands comprises a **script**, which can be run automatically by the `R` program as well.)
+
+#### R is a **tool for statistics**.
+
+In contrast to Python, R is not a general programming language. Rather, R was developed for the use of **data scientists** and **statisticians** specifically. Because of this, many statistical tasks are very easily provided by even the **base R libraries**. For example, manipulating data and creating and evaluating linear models are readily available in R by default via the `data.frame()` and `lm()` commands respectively. 
+
+To do such tasks in Python, packages such as `pandas` and `scikit-learn` must be installed first. Of course, if you have already installed Anaconda in `py0` of the SUSA Crash Course curriculum, you have these packages installed already.
+
+(*Note: A **package** (very similar to a **library** or **module**) is an addition to a **base program** that gives it more commands and functionality. For example, the `ggplot2` package is a package for R that allows you to create high-quality graphs and visualizations.*)
+
+**Because R was made specifically with statistics in mind, it is a premier language for statistical computing, data visualization, and machine learning. R makes data science incredibly quick to write and simple to understand.**
+
+#### R is a **data visualization suite**.
+
+In addition to running statistical computations, R is very useful for graphing data as well. Especially within the context of RStudio, R (in conjuction with the `ggplot2` package) can be used to make sophisticated displays of data, useful in both  *exploratory data analysis* (**EDA**) and *presentation of research findings*. 
+
+## What is RStudio?
+
+By itself, R is a powerful programming language. However, its basic use is command-line only. In order to make writing R easier for statisticians, a group of statisticians based in Boston developed **RStudio**, an IDE for R programming. An **IDE** (*integrated development environment*) is a program designed to facilitate programming in a particular language. RStudio is a desktop (or server) application that eliminates the need for a CLI (as it comes packaged in RStudio itself) and includes a **notebook panel** for writing and running scripts. But this just scratches the surface of RStudio's features...
+
+#### RStudio is for **joining various components in R**.
+
+RStudio is your one-stop shop for programming in R, reading R scripts and data, looking at help manuals, interactively running through tutorials and notebooks, and even making presentations like this one! 
+
+Just to name a few other features of RStudio, here are some of the more popular ones:
+- Managing packages
+- Displaying help and documentation
+- Cloud computing
+- Viewing and exporting visualizations
+- Publishing reports, presentations, and websites
+- Animated and interactive graphs
+- Writing in Python, C, Ruby, Bash, and more
+- Writing LaTeX
+
+#### RStudio is for **beautifying outputs**.
+
+As mentioned above, this workshop was made entirely in RStudio with the help of the `knitr` package (included by default). You can make professional research reports in the form of PDFs, webpages like this one (which can even include interactive graphs and code), and slide presentations.
+
+Additionally, RStudio was created to interface well with `ggplot2` and other datavis packages, allowing you to save plots as files on your computer, with options to specify resolution and picture size. 
+
+#### RStudio is for **getting help quickly**.
+
+At anytime while writing an **R Markdown** or **R Notebook** file, you can use the console to test functions and read the associated documentation.
+
+For example, if you're ever curious about what a function (e.g. `lm`) does, simply type e.g. `?lm` into the R interactive console to the lower-left of the application.
+
+#### RStudio is for **sharing open workflows**.
+
+Did you know? RStudio is compatible with Git (and Github)! Simply opening up a Git repository in RStudio allows you to add, commit, push, and pull all within RStudio itself - no need to open up your Terminal to do it from there!
+
+In addition, because RStudio's outputs are fully readable by any other computer (even computers that don't have R or RStudio installed), RStudio facilitates in the sharing of code and statistical reports. 
+
+### **RStudio Desktop** vs **RStudio Server**
+Of note, there are actually *two versions of RStudio*. The first is **RStudio Desktop**, which will be covered by this tutorial. RStudio Desktop will run as a local application on your computer. The second version of RStudio, **RStudio Server**, will run as a locally-hosted server. If you were to link up that server to the Internet, you could access your RStudio server as a webpage, and run R scripts "on the cloud". For most users, **RStudio Desktop** is more than enough for now.
+
+## What is CRAN?
+
+You may have noticed some of the pages referred to in this guide contain links related to CRAN. **CRAN** (*The **C**omprehensive **R** **A**rchive **N**etwork*) is a network of servers that each hold an identical **mirror** (*synchronized download link*) to various R packages, and the base R program itself. Universities and labs around the world maintain these servers, ensuring they are all up-to-date at all times. For example, Berkeley hosts its own server for R downloads, located at [cran.cnr.berkeley.edu](
+https://cran.cnr.berkeley.edu/).
+
+# Installing R
+## For Mac
+1. Visit [the R downloads page for Mac](https://cran.cnr.berkeley.edu/bin/macosx/) and follow the link to the latest version of base R (as of the writing of this workshop, [**R 3.4.3**](https://cran.cnr.berkeley.edu/bin/macosx/R-3.4.3.pkg)).  
+2. Run the downloaded `.pkg` installer and follow the installation steps. For most users, the default specifications will do just fine.
+3. After you are finished, test your R installation by running `R` in your Bash console. *Note: in contrast to most CLI commands, `R` **must** be uppercase*.
+  + Once R is running, try commands like `2+3` or `log(8, base = 2)`
+  + Quit R by entering `q()` (there is no need to save the workspace image)
+
+## For Windows
+1. Visit [the R downloads page for Windows](https://cran.cnr.berkeley.edu/bin/windows/) and follow the link to the latest version of base R (as of the writing of this workshop, [**R 3.4.3**](https://cran.cnr.berkeley.edu/bin/windows/base/R-3.4.3-win.exe)).  
+2. Run the downloaded `.exe` installer and follow the installation steps. For most users, the default specifications will do just fine.
+3. After you are finished, test your R installation by running `R` in your Bash console. *Note: in contrast to most CLI commands, `R` **must** be uppercase*.
+  + Once R is running, try commands like `2+3` or `log(8, base = 2)`
+  + Quit R by entering `q()` (there is no need to save the workspace image)
+
+## For Linux
+1. Visit [the R downloads page for Linux](https://cran.cnr.berkeley.edu/bin/linux/) and follow the link to your particular Linux distro family. 
+2. Follow the steps listed in the `README` document (which, depending on the family you use, may appear as the HTML page) to install R onto your computer. For most users, the default specifications will do just fine.  
+3. After you are finished, test your R installation by running `R` in your Bash console. *Note: in contrast to most CLI commands, `R` **must** be uppercase*.
+  + Once R is running, try commands like `2+3` or `log(8, base = 2)`
+  + Quit R by entering `q()` (there is no need to save the workspace image)
+  
+# Installing RStudio
+## For Mac
+1. Visit [the RStudio Desktop download page](https://www.rstudio.com/products/rstudio/download/#download) and follow the link to the latest version of RStudio (as of the writing of this workshop, [**RStudio 1.1.423**](https://download1.rstudio.org/RStudio-1.1.423.dmg)).  
+2. Run the downloaded `.dmg` installer and follow the installation steps. For most users, the default specifications will do just fine.  
+3. After you are finished find the RStudio application by pressing `CMD-SPACE` and entering "RStudio" into the search bar. You should be able to run RStudio without any errors.
+
+## For Windows
+1. Visit [the RStudio Desktop download page](https://www.rstudio.com/products/rstudio/download/#download) and follow the link to the latest version of RStudio (as of the writing of this workshop, [**RStudio 1.1.423**](https://download1.rstudio.org/RStudio-1.1.423.exe)).   
+2. Run the downloaded `.exe` installer and follow the installation steps. For most users, the default specifications will do just fine. 
+3. After you are finished find the RStudio application by pressing `WINDOWS` and entering "RStudio" into the search bar. You should be able to run RStudio without any errors.
+
+## For Linux
+1. Visit [the RStudio Desktop download page](https://www.rstudio.com/products/rstudio/download/#download) and follow the link to the latest version of RStudio (as of the writing of this workshop, **RStudio 1.1.423**) for your Linux distro.   
+2. Run the installer using the standard Bash command for your distro and follow the installation steps. For most users, the default specifications will do just fine. 
+3. After you are finished, you should be able to run RStudio on your machine without any errors.
+
+# Conclusion
+Today, we learned about R, RStudio, and CRAN. To summarize, R is a statistical programming language and runtime environment hosted by the CRAN mirros. RStudio is a (desktop) program used to write in R effectively, and includes a multitude of features to enhance the R programming experience. We then learned how to install R and RStudio from Berkeley's CRAN mirror. 
+
+Stay tuned for next week's workshop, **r1**, on basic R programming!
+
+# Additional Reading
+- The premier free online textbook for R, written by one of the leading developers of the R ecosystem, ["R for Data Science" can be found here](http://r4ds.had.co.nz/).
+- The follow-up textbook to ["R for Data Science"](http://r4ds.had.co.nz/), ["Advanced R", can be found here](http://adv-r.had.co.nz/).
+- For a detailed official guide on R, see the first three manuals on [this CRAN page](https://cran.cnr.berkeley.edu/manuals.html).
+- For more information on RStudio's features, visit this [page on the RStudio website](https://www.rstudio.com/products/rstudio/features/).
+- For an interactive guide to learning R and Python, visit [DataCamp](https://www.datacamp.com/) a paid tutorial website for learning data computing.

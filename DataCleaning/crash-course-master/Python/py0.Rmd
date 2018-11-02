@@ -1,0 +1,88 @@
+---
+title: Introduction to Python
+subtitle: "Part 0: Installing Python, Anaconda, and other Dependancies" 
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = F)
+```
+
+# Introduction
+
+In this mini-tutorial, you will learn how to install [Python](https://www.python.org/) (a computer programming language) and [Anaconda](https://conda.io/docs/glossary.html#anaconda-glossary) (a distribution that automatically installs Python and a bunch of auxillary packages useful for data science). This is in preparation for **py1**, SUSA's crash course on Python for data science.
+
+# Installing Python & Anaconda
+## For Mac
+1. Visit [the Anaconda website](https://www.anaconda.com/download/) and click the Mac icon. Install the Python 3.6 version of Anaconda.
+2. Run the downloaded .pkg file, and begin to step through the installation process. On the `Destination Select` stage, highlight `Install for me only` before continuing. 
+3. When finished, Anaconda, Python, pip, and other Python libraries will be installed on your machine. To test your installation, navigate to the `anaconda3` folder, usually found by typing the following into your Terminal and pressing `ENTER`:
+```{bash}
+cd ~/anaconda3/
+```
+Then, run the conda command in the `/bin/` folder by typing the following into your Terminal and pressing `Enter`:
+```{bash}
+./bin/conda list
+```
+If a list of packages is displayed on your screen, Anaconda installed successfully!
+4. If Anaconda installed successfully, you'll want to add Anaconda commands to what's called your PATH. This allows you to run Anaconda commands, like `conda`, `pip`, and `ipython` without navigating to your Anaconda installation folder first. To refresh your path, and therefore add Anaconda to it, type the following into your Terminal:
+```{bash}
+source ~/.bash_profile
+```
+5. Next, we'll need to install iPython so that you can view iPython notebooks, such as those hosted in the SUSA Crash Courses repository.
+First, run the following conda commands in your Terminal:
+```{bash}
+conda update conda
+conda update ipython
+conda update jupyter
+```
+6. You should now be able to launch and interact with iPython notebook files. To do so, navigate to the directory containing iPython files with:
+```{bash}
+cd /your/ipython/directory/here
+```
+and then run:
+```{bash}
+jupyter notebook
+```
+
+## For Windows
+*(NOTE: CURRENTLY UNTESTED INSTALLATION GUIDE*)  
+
+1. Visit [the Anaconda website](https://www.anaconda.com/download/) and click the Windows icon. Install the Python 3.6 version of Anaconda.  
+2. Run the downloaded .exe file, and begin to step through the installation process. On the `Destination Select` stage, highlight `Install for me only` before continuing. We recommend **NOT** adding Anaconda to your path, as it can conflict with other applications.   
+3. When finished, Anaconda, Python, pip, and other useful Python libraries will be installed on your machine. To test your installation, search for the **Anaconda Navigator** application and run it.  
+4. Anaconda Navigator should include iPython/Jupyter so that you can view iPython notebooks, such as those hosted in the SUSA Crash Courses repository. You should now be able to launch and interact with iPython notebook files. To do so, navigate to the directory containing iPython files and launch them using Anaconda Navigator.  
+
+## For Linux
+1. Visit [the Anaconda website](https://www.anaconda.com/download/) and click the Linux icon. Install the Python 3.6 version of Anaconda.
+2. Go to your Downloads folder, and run the downloaded .sh file with `bash ./<Anaconda_installer_name.sh>`, and begin to step through the installation process. This will involve reading a Terms and Conditions document (press `ENTER` to read through) and agreeing to a installation location. Make sure to indicate `yes` to prepending the Anaconda installation to your PATH.
+3. When finished, Anaconda, Python, pip, and other Python libraries will be installed on your machine. To test your installation, list the packages that Anaconda has installed on your machine with:
+```{bash}
+conda list
+```
+4. Next, we'll need to install iPython so that you can view iPython notebooks, such as those hosted in the SUSA Crash Courses repository.
+First, run the following conda commands in your Terminal:
+```{bash}
+conda update conda
+conda update ipython
+conda update jupyter
+```
+5. You should now be able to launch and interact with iPython notebook files. To do so, navigate to the directory containing iPython files with:
+```{bash}
+cd /your/ipython/directory/here
+```
+and then run:
+```{bash}
+jupyter notebook
+```
+
+# Additional Readings
+- For more help on installing Anaconda, please visit the official [ANACONDA Installation Guide](https://docs.anaconda.com/anaconda/install)
+- For introductory tutorials on how to write in Python, please visit the official [Python Learning page](http://docs.python-guide.org/en/latest/intro/learning/)
+- For more information on iPython/Jupyter and their advantages, visit the official [iPython/Jupyter website](https://ipython.org/)

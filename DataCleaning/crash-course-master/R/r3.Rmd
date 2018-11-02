@@ -1,0 +1,724 @@
+---
+title: Introduction to R
+subtitle: "Part 3: Data Visualization and Data Analysis" 
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by [Arun Ramamurthy](mailto:contact@arun.run)."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+
+
+```{r, echo = F, message = F, warning = F}
+library(tidyverse);library(magrittr);library(ggplot2);library(anytime);library(broom);library(glmnet);library(glmnetUtils)
+```
+
+# Introduction
+
+In this last of SUSA's crash courses on introductory R programming, we will round out the data manipulation skills learned in `r2` (on data cleaning, which, if you recall, captured $\sim 80\%$ of data science) with the fun part - data analysis! In this tutorial, you will learn how to use `ggplot2`, R's premier data visualization library, to conduct **EDA** (*exploratory data analysis*) and display data in visually powerful ways. You will also learn our first machine learning algorithm, **linear regression**, a classical method in statistical analysis. You will learn how to verify the assumptions of the linear regression model, how to interpret its results, and even how to use and tune more complex regressions like **ridge regression** and **polynomial regression**.
+
+## About this Document
+### Prerequisites
+The immediate prerequisite this tutorial is [r2](r2.html), which covers several `tidyverse` packages used for data cleaning. You will also need to install both R and RStudio to use the [r3-workbook](r3-workbook.Rmd) associated workbook. Visit [r0](r0.html) for general information on the philosophy and functionality of R and RStudio, as well as installation guides for both.
+
+### r3
+This document contains textbook-style information on R programming. It will cover the essentials of data visualization with `ggplot2` and an introduction to statistical analysis and inference with an overview of linear regression in R.
+
+Throughout this tutorial, you will be working with three distinct datasets, to give you familiarity and practice with the `tidyverse`. These datasets are as follows:
+
+1. `iris`, the Edgar Anderson's classical multivariate dataset on 150 flowers in a Canadian field. This dataset will be used to illustrate some of the `ggplot` functions.   
+2. `diamonds`, a dataset containing the prices and various attributes of almost 54,000 diamonds. This dataset will be used to illustrate some of the `ggplot` functions.  
+3. `mpg`, a subset of EPA's dataset on fuel economy, including the `hwy` fuel efficiency and other attributes of 234 automobiles from 1999 to 2008. This dataset will be used in the two mini-projects in [r3-workbook](r3-workbook.Rmd#mini-projects).
+
+### r3-workbook
+The [r3-workbook](r3-workbook.Rmd) contains associated exercises to work through as you learn about the concepts within this document. They are aimed to help you get practice and familiarity with R programming concepts and functions. At the end of each section of this document, solve the problems in the matching section of the workbook to help your understanding of the material.
+
+# Data Visualization and Analysis
+
+What is the purpose of data science anyway? I don't mean to get all philosophical on you, but it is important to have an understanding of the objectives of the data science paradigm as you learn data science techniques.
+
+While you'd get different answers from different data scientists, here are the three main objectives that I have in the data science projects I embark upon:
+
+### Objectives of Data Science
+#### **Objective I:** Show humans what structures exist in the data.
+#### **Objective II:** Use inference to make conclusions about the relationships and structures in the data.
+#### **Objective III:** Use machine learning to make predictions about new, but similar, data.
+
+The difference between your Statistics classes and data science in practice is that your Statistics classes are primarily focused on **Objective II** and **Objective III**. For example, STAT 135 & STAT 151A concern themselves primarily with statistical inference in the form of confidence intervals, hypothesis testing, and regression coefficient interpretation. STAT 154 and machine learning in general concerns itself with classification and prediction of new data points given prior data. 
+
+In contrast, this workshop is concerned primarily with **Objective I**. Humans are visual creatures, and so while a computer is most able to interpret bytes of numbers and texts, humans would rather see data visually! A data scientist or statisticians requires the trust of their coworkers and managers and the public at large. Tables can be an information overload, and model paramatizations may be foreign to your audience. Graphs are one way we connect our *data* to the *people* who care about them. The other is statistical reporting, which can prove to be difficult without practice simplifying results without losing precision or accuracy.
+
+##### Looking at *tabulations* of data is hard for **humans**, but easy for **computers**.   
+
+##### Looking at *visualizations* of data is hard for **computers**, but easy for **humans**
+
+Every data scientist relies on the audience's understanding of their work, whether their project manager or a client, and so effective data visualization and reporting skills are essential when presenting your findings. Even for a data scientist working on private research, data visualization is a powerful tool to view various aspects and relationships within the data, allowing for a deeper understanding of the underlying structure of data. 
+
+Some examples of structures that are easily detectable by humans in graphical displays of data are:   
+- Outliers  
+- Clusters  
+- Relationships between variables  
+- Timed processes via animated plots  
+- Spacial distributions via geolocational visualizations  
+
+As you will see in the second part of this tutorial, models like **linear regression** come with a host of assumptions - some of which are most rapidly verified graphically. While the linear regression model is powerful, it doesn't work in all cases. Blindly applying models to data without exploring the data visually first (*EDA*) can lead to flawed model design and misinterpretation of results. Once you have a suspicion about the structure of the underlying distribution and patterns in the data, you can then use analysis to either predict new data with known certainty, or inferential statistics to assign quantatative interpretations to these structures. Plus, plotting data is fun! You can quickly pluck out insights in the data in ways that aren't as easily described quantitatively.
+
+> “The greatest value of a picture is when it forces us to notice what we never expected to see.” — John Tukey
+
+One last thought about data visualization - it's a craft, part technique and part creativity. Feel free to try various ways of displaying the same patterns in your behavior, and while there are some broad guidelines to effective visualization, a lot of it comes with instinctual creativity and practice.
+
+# Data Visualization with `ggplot2`
+
+`ggplot2` is R's premier library for data visualization. Although its syntax is quite different than the rest of base R and most packages, there's a method to its madness - `ggplot2` is backed by a  *grammar of graphics* that allows it to make any plot imaginable (within the constraints of its `geoms`). However, just because any plot is possible, doesn't mean every plot is good... Let's start by reviewing some essential tips for effective visual display of data.
+
+## Tips for Data Visualization
+
+First and foremost: tell a story! Data may seem very cold and neutral, but data are quantifications of behaviors in our world. Graphs are how we can make data less cold, and more interpretable for humans. Each graph should show something insightful, important, and easily detectable by the audience. Of course, the are a variety of ways to display the same patterns - the creative process of effective data visualization is choosing *how* to say the story best.
+
+Some other tips for data visualization include:   
+
+-  Minimize the **data-ink** ratio, or the amount of information you are showing per unit of "ink". You want to only include visual information relevant to your point for that specific graph. If you can't get rid of irrelevant details without the graph looking sparse, consider highlighting the patterns, trends, or outliers you want the audience to concentrate on with color, sizing, or labels.      
+- Include a (zero) **baseline**. Scales give the relative positions between various quantities, but if the audience has no idea what general context the numbers exist in, there's no point in comparing them. Often times, this means including `y = 0` or `x = 0` in your axis, rather than line breaking, which can be seen as intentionally misleading.     
+- Communicative elements are a **must**. Whether this means simply axis and plot titles, rearranging your legend, or adjusting font sizes to show up better on a projector screen, it must be immediately obvious to a new viewer what your graph aims to display.     
+- Keep engrained preconceptions of **colors** in mind. For example, it is generally inadvisable to use bright red to indicate positive trends. Additionally, be wary of color-blindness, which affects over seven percent of the American populace. Finally, use differentiating colors to highlight factors, sequential colors to highlight trends, and diverging colors to highlight splits in behavior. The [`RColorBrewer`](http://colorbrewer2.org/) package is an extension of `ggplot2` that allows you to easily switch between color themes specially designed for data visualization.    
+* Order bars by height. Humans prefer things ordered, and it makes relative comparison between bars much more visible.     
+* Never use pie charts. This is decreed by the legendary Edward Tufte, one of the founders of data visualization, who noted its imprecision for more than a couple categories or dimensions. Usually, bar charts are just better. Also, stay away from double-axis graphs - unless you *want* to mislead someone...
+
+> “The only worse design than a pie chart is several of them,”  — Edward Tufte
+
+## Vocabulary for Data Visualizations
+
+* a **geom** is the visualization's representation of an aspect of a dataset, e.g. bars in a bar plot, or points in a scatterpoint. geoms have various **aesthetics** (*aesthetic properties*), like x-location, y-location, transparency, shape, and color, that can be mapped to variables in a dataframe   
+* a **glyph** is the visual equivalent of a single datapoint, e.g. a single point in a scatterplot    
+* a **layer** is a set of *glyphs* of the same *geom*, e.g. the collection of points in a scatterplot
+
+## Abstractions of Data Visualization
+
+The `gg` in `ggplot2` stands for *"Grammar of Graphics"*. `ggplot2` is the implementation of this idea that all data visualizations decompose into specific components, and so if we have a way to manipulate each component and then sum them together, we can make any plot!
+
+The components used in the *layered grammar of graphics* underyling `ggplot2` are as follows:   
+
+1) a base **dataset**, and a set of mappings from **variables** to **aesthetics**   
+2) one or more **layers**, with each layer of **glyphs** having:  
+    - one geometric object, or **geom**
+    - (optionally) one statistical transformation  
+    - (optionally) one position adjustment  
+    - (optionally) an alternative dataset and set of aesthetic mappings  
+3) a **scale** for each aesthetic mapping  
+4) a **coordinate system**    
+5) (optionally) **facet specification**  
+6) **communicative elements** (labels, borders, titles, etc.)  
+
+The basic idea is that we first construct an empty ggplot by specifying the dataset and mappings, then add layers of geometric objects, then alternative scales, coordinates, or faceting if we wish to deviate from the default, and finally communicative elements for human audiences, such as labels, subtitles, and grid lines.
+
+To make this abstraction a little more relatable, imagine you are tasked to draw a scatterplot by hand for a Statistics class. First, you would $(1)$ decide on what **data** you would be plotting, and then draw the relevant **axes**. Then, you would $(2)$ plot a **layer** of points onto your page, $(3)$ choosing your position by whatever **scale** you set for each axis. If you were going to either use $(4)$ another **coordinate system** or $(5)$ some sort of **faceting**, you would also need to draw the graph accordingly. The final step would be to $(6)$ add axis labels, a title, and other **communicative elements**. 
+
+As you could imagine, you could make up a similar recipe for any plot possible. Just like this analagy and the abstraction it illustrates, the syntactic structure of `ggplot2` is meant to mimic the actual modular creation of plots. We're going to drop this diagram here (*notice the similarity to the grammar above!*) for now, but we will be going into it in much more detail in the following section, on `ggplot2` basics!
+
+![](images/ggplot-syntax.png)
+
+## `ggplot2`
+
+### `ggplot`, `aes`
+Creating a ggplot starts with constucting an `ggplot` object. If you check `?ggplot`, you will see that `ggplot` has two arguments:   
+- `data`, the dataframe you wish to display  
+- `mapping`, a function call to `aes`, to make a mapping between aesthetics in the plot and variables in `data`  
+
+The `aes` (*aesthetic mapping*) function is used to tie visual elements of the plot to variables in the dataframe. The function header for `aes` is as follows:
+```{r, eval = F}
+aes(x, y, ...)
+```
+
+By default, the first argument (`x`) you supply to `aes` indicates which variable in your dataframe corresponds to the x-axis, and the second argument (`y`) indicates which variable corresponds to the y-axis.
+
+However, you can also make mappings with, for example:     
+- `col`/`color`/`colour`, the colors of the geoms you are plotting  
+- `fill`, the filled color of the geoms you are plotting  
+- `shape`, used to map the shape of the points you are plotting  
+- `linetype`, used to map the linetype (e.g. dashed, dotted, etc.) of the lines you are plotting     
+- `alpha`, used to vary the *transparency* of the geoms by some variable   
+
+Although the "default" mappings can be set in the `ggplot` constructor, you can also set a different `data` and `mapping` argument in your specific geoms too.
+
+An important warning here: `aes` is used to map **aesthetics** to **variables**, *NOT* to make declare constants. If you wished to set your geom to be red for example, you cannot use `aes(col = "red")`. You must instead declare `col = "red"` *outside* of the `aes` function call.
+
+Let's make a ggplot object for the `iris`, mapping `Petal.Length` to the x-axis and `Sepal.Length` to the y-axis:
+```{r}
+ggplot(iris, aes(Petal.Length, Sepal.Length))
+```
+
+As you can see from the figure above, the output of the `ggplot` constructor function is a `ggplot` object. The x-axis is already labeled to map to `Petal.Length`, as is the y-axis for `Sepal.Length` - just as we had told the `aes` function.
+
+However, the plot is still empty. Why? Because we haven't supplied any more components to add to it! Specifically, we haven't added any **layers**. 
+In `ggplot2` syntax, you can add layers and other components to a `ggplot` by literally using the addition operator, `+`. Since a `ggplot` object `+` any layer is still a `ggplot` object, we can use this modular approach to add as many layers and components as we want to a `ggplot` object.
+
+### `geom_*`
+
+Layers of geoms can be added to a `ggplot` object with one of the `geom_*` functions. As always, you can quickly glance over the documentation of each `geom_*` function we go over by checking e.g. `?geom_point`. There are dozens of `geom_*` functions in `ggplot2`, so this text will focus on a few of them to illustrate the general `ggplot2` syntax. You can easily find a visual listing of the geoms in `ggplot2` in the official [ggplot2 Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
+
+#### Continuous Bivariate Data (`geom_point`, `geom_jitter`)
+
+First, let's add on `geom_point` as a layer to turn our empty `ggplot` into an actual scatterplot. As a reminder, a **scatterplot** uses a layer of points to display the relationship between the `x` and the `y` variables in your data. In this case, we set our `x` to map to `Petal.Length` and `y` to map to `Sepal.Length`. So, by adding a single layer with `point` as the geom, we can visualize the relationship between `Petal.Length` and `Sepal.Length` in the `iris` dataset.
+
+```{r}
+ggplot(iris, aes(Petal.Length, Sepal.Length)) + geom_point()
+```
+
+Neat! We can already see a positive, linear relationship between `Petal.Length` and `Sepal.Length` - a relationship that would have been difficult to notice by just reading through all fifty entries in the `iris` dataframe.
+
+Sometimes you will encounter datasets that have a small number of discrete values for either the `x` variable or the `y` variable. These datasets initially seem like terrible candidates for `geom_point`, because the datapoints overlap too much to discern any patterns. For example, suppose we wanted to display the relationship between the `cut` of a diamond and its `clarity`, using the data in the `diamonds` dataset. 
+
+```{r}
+diamonds %>% ggplot(aes(cut, clarity)) + geom_point()
+```
+
+In our initial display, we cannot see any pattern whatsoever, as though there are multiple points for each combination of `cut` and `clarity`, but we have no information about how many points are in each. To solve this, and also to illustrate the modifiable nature of `geoms` in `ggplot2`, we can adjust the `position` option argument of `geom_point` to **jitter**, or add a small amount of randomness to, each point to spread them out a little.
+
+```{r}
+ggplot(diamonds, aes(cut, clarity)) + geom_point(position = "jitter")
+```
+
+Already, we can see the underlying pattern of the data more clearly. A diamond with high clarity, such as `IF` or `VVS1`, is more likely to be of a high cut than a low one. Since the "jitter" option for `geom_point` is so commonplace, `ggplot2` has a shortcut function for `geom_point(position = "jitter")`, `geom_jitter`. 
+
+To showcase the other options of `geom_point`, let's also set the `alpha` to be a constant 10%, to allow us to see through dense clusters of points, and the `size` of the points to be 0.5.
+
+```{r}
+ggplot(diamonds, aes(cut, clarity)) + geom_jitter(alpha = .1, size = .5)
+```
+
+Finally, note that since we are only plotting a single geom, we could (just for fun) move all of the "global" arguments for `ggplot` to be "specific" arguments for just the `geom_jitter` layer, and the graph would look identical:
+```{r}
+ggplot() + geom_jitter(data = diamonds, aes(cut, clarity), alpha = .1, size = .5)
+```
+
+(*NOTICE: the constant setting to `alpha` and `size` is done outside of `aes`*)
+
+Now, we can see even more facts about our data. For example, it is now visually obvious that most of the diamonds in the `diamonds` dataset are of `VS2` clarity and `Ideal` cut.
+
+#### Continuous Univariate Data (`geom_histogram`, `geom_area(stat = "bin")`, `geom_density`)
+
+To display continuous univariate data (*data of just one variable*), `ggplot2` has a variety of geoms. One common way to diplay the distribution of a continuous variable is via a **histogram**. A histogram consists of **bins** on the x-axis, and the counts of each bin as the y-axis.
+
+To make a histogram in `ggplot2`, you just supply one variable to `aes` and use the `geom_histogram` geom. For example, suppose we wanted to visualize the distribution of the petal lengths of the fifty irises. Just to fit the theme, let's also make the bars orchid-coloured.
+```{r}
+iris %>% ggplot(aes(Petal.Length)) + geom_histogram(fill = "orchid")
+```
+
+(*NOTICE: We used `fill` instead of `color` here to modify the color of the filled bars instead their edges*)
+
+There seems to be a lot of flowers with noticably shorter petals than the rest. However, the low-resolution of the bars make it difficult to exactly see the shape of the distribution. A smoother way to display the counts of a single continuous variable is with a **binned area plot**, called binned because the y-axis again corresponds to the counts of each bin.
+
+The `geom_area(stat = "bin")` function specification is used to create these "smoothened" histograms. Let's recreate a smoother version of our petal length plot:
+```{r}
+iris %>% ggplot(aes(Petal.Length)) + geom_area(fill = "orchid", stat = "bin")
+```
+
+Hmm... that's still not very smooth. To instead see a Guassian-smoothed **density plot**, which approximates a more curvy shape for the distribution of some variable, use `geom_density`. Let's make one last rendering of the petal lengths in the `iris` dataset:
+```{r}
+iris %>% ggplot(aes(Petal.Length)) + geom_density(fill = "orchid")
+```
+
+#### Discrete Univariate & Bivariate Data (`geom_bar`, `geom_col`)
+
+Now, suppose we want to graph the counts, not per bin of a continuous variable, but rather per value of a discrete variable. For example, let's find out how many cars are from each `manufacturer` from the `mpg` dataset:
+```{r}
+mpg %>% ggplot(aes(manufacturer)) + geom_bar()
+```
+
+Sometimes we want to plot some other variable than just the counts per value of a discrete variable. To plot other variables than the `count` for a discrete `x` value, use `geom_col` instead of `geom_bar`. For example, suppose we wanted to plot the average fuel economy for each car manufacturer. Let's also make each bar a different color, just to make things more interesting.
+```{r}
+mpg %>% group_by(manufacturer) %>%
+  summarise(`Average HWY Fuel Economy` = mean(hwy)) %>%
+  ggplot(aes(manufacturer, `Average HWY Fuel Economy`, fill = manufacturer)) +
+  geom_col()
+```
+
+(*Check for understanding: why was `fill` used in the `aes` call rather than outside the `aes` call this time?*)
+
+Apparently Honda and VW are the build the most efficient engines. However, humans find it easier to read bars that are ordered in height. Sometimes, you might want to try doing this with your graphs, using `dplyr`'s `mutate` function:
+```{r}
+mpg %>% group_by(manufacturer) %>%
+  summarise(`Average HWY Fuel Economy` = mean(hwy)) %>%
+  mutate(manufacturer = factor(manufacturer,
+                               levels = manufacturer[order(`Average HWY Fuel Economy`)],
+                               ordered = T)) %>%
+  ggplot(aes(manufacturer, `Average HWY Fuel Economy`, fill = manufacturer)) + 
+  geom_col()
+```
+
+That looks a little clearer! Now that we've finished a several ways to display data directly, let's discuss a couple of  geoms designed to highlight trends in data.
+
+#### Trends (`geom_line`, `geom_smooth`)
+
+Sometimes, you're given a **time series** that is best presented as a **line graph**. For example, suppose we had a dataframe called `stock_prices` that tracked the valuation of some statistical consulting company. We could use `geom_line` to create a line graph of the stock price over time:
+```{r, echo=F}
+stock_price <- data.frame(Date = anydate(anydate("2017.12.20"):anydate("2019.01.01"))) %>%
+  mutate(`Stock Price` = rnorm(nrow(.), 100, 20) %>% sort) %>%
+  filter(Date >= anydate("2018.01.01"), Date <= anydate("2018.03.01"))
+```
+```{r}
+stock_price %>% ggplot(aes(Date, `Stock Price`)) + geom_line()
+```
+
+To make the line thicker, we can use the `size` option for `geom_line`. Remember, you can always check e.g. `?geom_line` to see what optional arguments you can specify about your geoms.
+
+```{r}
+stock_price %>% ggplot(aes(Date, `Stock Price`)) + 
+  geom_line(size = 2)
+```
+
+To showcase the modularity of `ggplot2`'s components, let's also add a layer of points to the line plot too. Additionally, I beleive it can be misleading to not include the 0 in your plots. To expand the axes of your plots, use `expand_limits`, as seen here:
+```{r}
+stock_price %>% ggplot(aes(Date, `Stock Price`)) + 
+  geom_line(size = 2) + 
+  geom_point(size = 2) +
+  expand_limits(y = 0)
+```
+
+Of course, if we really wanted to, we could just go overboard and add even more geoms...
+```{r}
+stock_price %>% ggplot(aes(Date, `Stock Price`)) + 
+  geom_col(alpha = .3) +
+  geom_line(size = 2) + 
+  geom_point(size = 2) 
+```
+
+But that would clearly violate our dedication to a high data-ink ratio. It is better to use data visualization to highlight, rather than obsfucate, patterns and trends. Suppose we wanted to go back to our petal and sepal length scatterplot and more clearly highlight the relationship between the two variables. We could use `geom_smooth`, a geom that will add a smooth trend line to our visualization.
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length)) + 
+  geom_smooth(size = 2, alpha = .9) + 
+  geom_point(alpha = .7, size = 4) 
+```
+
+To turn off the **confidence band** around the smooth line, you can specify `se = FALSE`. Additionally, if you'd rather fit a **linear model** rather than the default model (usually **loess**, which you can read about [here](https://en.wikipedia.org/wiki/Local_regression)), you can manually specify `method = "lm"`. Finally, let's add a bit more information to this plot by coloring our points by `Species`. Our final plot is constructed as so:
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length)) + 
+  geom_smooth(method = "lm", se = F, size = 2, alpha = .9, col = "black") + 
+  geom_point(alpha = .7, size = 4, aes(col = Species)) 
+```
+
+This plot is relatively simple, but reveals several facts all at once:    
+
+1. Virginica are usually bigger than Versicolor, which are usually bigger than Setosa irises   
+2. There is a clear linear relationship between petal length and sepal length in this sample of irises   
+3l Virginica and Versicolor irises are noticably closer in size than the much smaller Setosa irises   
+4. Setosa irises tend to vary less in size than the other two species   
+
+### Faceting (`facet_wrap`, `facet_grid`)
+
+It's useful to view all three species together to compare and constrast them, but if we wanted to fit a line through each species, by specifying `color = Species` as a grouping aethetic for both `geom_point` and `geom_smooth`, our plot would look a bit messier:
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length, col = Species)) + 
+  geom_smooth(method = "lm", se = F, size = 2, alpha = .9, aes(col = Species)) + 
+  geom_point(alpha = .7, size = 4, aes(col = Species)) 
+```
+
+(*NOTE: alternatively, you can specify `aes(col = Species)` in just the `ggplot` constructor*)
+
+Sometimes, it's easier to read a lot of information if the graph is split into panels, one for each discrete case. The process of splitting your data into discrete panels is called **facetting**. In this case, let's **facet** by the `Species` of the irises. The syntax for `facet_wrap`, which is used to facet by a single variable, is `facet_wrap(~ VARIABLE)`. Observe the effect of facetting on this altered version of the plot above:
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length, col = Species)) + 
+  geom_smooth(method = "lm", se = F, size = 2, alpha = .9) +
+  geom_point(alpha = .7, size = 2) + 
+  facet_wrap(~ Species)
+```
+
+You can also specify the number of rows/columns, and whether or not every facet should have the same scale or not. Check `?facet_wrap` for more info. Here's another version of the plot above:
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length, col = Species)) + 
+  geom_smooth(method = "lm", se = F, size = 2, alpha = .9, aes(col = Species)) + 
+  geom_point(alpha = .7, size = 2, aes(col = Species)) + 
+  facet_wrap(~ Species, ncol = 1, scales = "free_y")
+```
+
+In some other cases, we want to make a grid of panels, for every combination of *two* discrete variables. The syntax for `facet_grid`, the two-dimensional version of `facet_wrap`, is `facet_grid(Y_VARIABLE ~ X_VARIABLE)`. Suppose we wanted to investigate how `carat` affected `price`, for each particular `color` and `cut` combination. One example plot to display this would be to have `carat` as the x-axis, `price` as the y-axis, and **facet** by `color` and `cut`, like so:
+```{r}
+diamonds %>% ggplot(aes(carat, price, col = color)) + 
+  geom_jitter(size = .5) + 
+  geom_smooth(method = "lm", se = F, alpha = .5, col = "black") +
+  facet_grid(color ~ cut)
+```
+
+Perhaps interestingly, it appears that the relationship between the carat of a diamond and its value are similarily related regardless of the diamond's color or cut. We will investigate the effect of the color and the cut of a diamond on the relationship between its carat and value near the end of this text.
+
+### Communicative Elements (`labs`, `theme`, `scale_*_*`)
+
+As described at the beginning of this workshop, communicative elements are essential for humans to be able to read and interpret your graph quickly. Words can direct the audience to notice such things as the purpose of a graph, the units of the variables, and more. Especially in presentations, labels are important because you rely on your audience understanding the graph within a few seconds of its display. To add labels to a plot, simply use the `labs` function:
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length)) + 
+  geom_smooth(method = "lm", size = 2, alpha = .9, col = "black", se = F) + 
+  geom_point(size = 4, aes(col = Species)) +
+  labs(x = "Petal Length (cm)", y = "Sepal Length (cm)", title = "Relationship between Petal Length and Sepal Length", 
+       subtitle = "You can make subtitles too!", caption = "And captions will appear here.")
+```
+
+If you want to modify parts of our plot, like how the title and labels appear, where the legend goes and more, you can use the `theme` function. This function has a literal tonne of parameters, so check `?theme`, `?element_blank`, `?element_line`, `?element_rect`, and `?element_text` to view them all! I won't go into detailed use of how to use theme, but here's an example of some of the more common options:
+```{r}
+iris %>% ggplot(aes(Petal.Length, Sepal.Length)) +
+  geom_smooth(method = "lm", size = 2, alpha = .9, col = "black", se = F) + 
+  geom_point(size = 4, aes(col = Species)) +
+  labs(x = "Petal Length (cm)", y = "Sepal Length (cm)", title = "Relationship between Petal Length and Sepal Length", 
+       subtitle = "You can make subtitles too!", caption = "And captions will appear here.") + 
+  theme(plot.title = element_text(face = "bold", size = 16, hjust = .5), 
+        legend.position = "bottom", panel.grid.minor = element_blank())
+```
+
+Finally, sometimes you may feel like choosing a different color scheme, for a variety of reasons, whether subjective or utilitary. In any case, use the `scale_*_*` functions (e.g. `scale_fill_brewer`, `scale_color_gradient2`, etc.) to easily select alternative color schemes. While I won't go into detail here, you can read up on how to edit the scales of both your [colors](http://ggplot2.tidyverse.org/reference/scale_brewer.html) and your [axis](http://r4ds.had.co.nz/graphics-for-communication.html#scales). There are also additional packages designed to make choosing themes in `ggplot2` easier and more fun, like [`RColorBrewer`](https://www.r-bloggers.com/how-to-expand-color-palette-with-ggplot-and-rcolorbrewer/), [`ggthemes`](https://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html), and my personal favorite collection of `ggplot2` themes, [`ggthemr`](https://github.com/cttobin/ggthemr).
+
+# Data Analysis
+
+At this point, you're ready to begin practicing EDA for yourself, and will quickly get used to using `ggplot2` to make beautiful visualizations of data. But, data visualization is a more powerful tool than just a tool for exploratory data anlaysis. Heavy statistical analysis, in the form of regression or other machine algorithms, can also be aided significantly by data visualization. This can come in the form of EDA being used to verify vital assumptions for these methods, but also to graph information about the models themselves! 
+
+**Data analysis** pertains primarily to **Objective II** and **Objective III** in the Data Science Objectives outlined above. Once you have begun to suspect the existence of certain patterns, relationships, and structures in your data from EDA, data analysis is how you formalize these structures for statistical inference (**Objective II**) and predict the properties of new data with quantifiable accuracy (**Objective III**).
+
+In this section, you will learn the essentials of one of the most commonplace machine learning algorithms used for data analysis, linear regression. **Linear regression** is an ML model that learns about the linear relationships between the variables in your data, given some training dataset. Linear regression is different than the more cutting edge algorithms, such as neural nets and XG Boost, in two ways:    
+1. Linear regression has a long history rooted in Statistics. Some would even say linear regression was invented *before* statistics itself - [the **least squares method** was invented by Carl Gauss himself in 1809](https://en.wikipedia.org/wiki/Least_squares#History). So, the statistical theory underying linear regression is well-understood.   
+2. Linear regression is a fairly simplistic model. It comes with a host of assumptions, but because the model is so rigid, we can interpret its results easily. This is in contrast to other ML algorithms, like neural nets, that are "black-box" models - humans struggle to understand why these models output the results they do.   
+
+Because of its rich history and relatively simple structure, linear regression comes with **statistical interpretability** of its results. That is, you can directly interpret the optimal slopes of your independent variables to make statistically-backed statements about the relationships in your data. But before we dive into linear regression in more detail, what is regression anyway?
+
+## What is Regression?
+
+**Supervised** machine learning algorithms, or models that use **training** data to understand and predict the nature of new (**test**) data, can be divided into two categories: ($1$) classification algorithms, where the response variable $Y$ is discrete, and $(2)$ regression algorithms, where the response variable $Y$ is continuous. 
+
+For example, suppose we used student information (e.g. major, hobbies, hometown region, etc.) from the CX committee to predict the favorite ice cream flavors of the entire SUSA member population, given the same information about each member. This would be a *classification* problem, since we are trying to classify our members into distinct categories (favorite ice cream flavor). On the other hand, suppose we wanted to use that same information to predict the GPAs of each SUSA member, or the likelihood of them getting a particular grade in STAT 133. These are *regression* problems, since we are not classifying, but predicting numerical values for our members. 
+
+In particular, the regression models we will be covering today concern themselves with finding the average (read: expected) value of the **response variable** $Y$ given information about one or more **explanatory variables** $X$. Formally, for a dataset with $n$ datapoints and $k$ explanatory variables, given some information about a datapoint in the form of its explanatory variables $X$ we want to predict $\hat{Y} = \mathbb{E}(Y|X)$, our expectation for $Y$. In the example above, GPA would be our response variable $Y$, and major, hobbies, and hometown would be our response variables $X$. 
+
+Note: I used plural for $X$ because $X$ is best understood as a matrix of several variables. The specifics of the geometric and linear algebra interpretation of the linear regression model will be much further developed in your classes, specifically STAT 135 and STAT 151A. 
+
+## Linear Regression
+
+### The Linear Regression Model
+
+The linear regression model further specifies that there is a linear relationship between $X$ and the predicted value of $Y$, captured by the slope, $B$. Formally, the model becomes: $\hat{Y} = \mathbb{E}(Y|X) = XB$.
+
+For now, let's quickly review **simple regression**, which the regression of a single variable $x$ onto $y$. The simple regression model can be written as: $\hat{y} = \alpha + \beta x$. The trick to linear regression is that we will choose $\hat{\alpha}$ and $\hat{\beta}$ that maximize the **fit**, or *accuracy* of our line. This is why the line determined by $\hat{\alpha} + \hat{\beta}x$ is known as the *line of best fit*.  
+
+But how do we determine the fit/accuracy of a given simple linear regression model on our data? We need some sort of **objective function** that rates how well accurate our model is. Usually, the objective function is some rating of the error in our model - minimizing this objective function will then yield the most optimal model.
+
+One naive approach is to minimize $z_0(a, b) = \sum e_i = \sum (y_i - \hat{y_i})$, or the sum of all the **residuals** (errors) our model $y_i$ has with the true $y$ in the data. As it turns out, this is not an effective metric for a variety of reasons, and positive residuals may cancel out negative ones - in fact, for any linear regression that passes through the mean of our dataset, $(\bar{x}, \bar{y})$, $z_0(a,b) = 0$, regardless of $b$. Instead, we will use the **sum of squares** method: $z(a,b) = \sum(e_i)^2 = \sum (y_i - \hat{y_i})^2 = \sum (y_i - a - bx)^2$. This value is known as the **residual sum of squares** (RSS). 
+
+If you were to use a technique like the First Derivative Test to find the optimal values of $a^* = \hat{\alpha}$ and $b^* = \hat{\beta}$, you would find:
+$ \hat{\alpha} = \bar{y} - \hat{\beta} \bar{x} $
+$ \hat{\beta} = \frac{\textit{Cov}(x,y)}{\textit{Var}(x)} $
+
+The value for $\hat{\alpha}$ necessarily forces the line to always pass through the mean of the data, $(\bar{x}, \bar{y})$, and the value of $\hat{\beta}$ offers information about the slope, or relationship, between $x$ and $y$.
+
+### Linear Regression in R
+
+Of course, although all of this math is important for understanding the linear regression model, in practice, R will do it all for you! Simply use the base R function, `lm`. `lm` uses a **formula** syntax, where the reponse variable is on the left and the explanatory variable(s) are on the right: `Y ~ X1 + X2 + X3 ...`. Alternatively, you can simply request all the explanatory variables with `Y ~ .`, where `Y` is the response variable column in your dataframe.
+
+The complete function sytax is `lm(data, formula)`. Let's use linear regression to understand the relationship between petal lengths and sepal lengths in the `iris` dataset:
+```{r}
+length_model <- lm(data = iris, formula = Sepal.Length ~ Petal.Length)
+print(length_model)
+```
+
+The output of the `lm` function can be read as follows: for every centimeter increase in `Petal.Length`, `Sepal.Lengths` increases by an average of 0.4089 centimeters. For a theoretical flower with a `Petal.Length` of zero, the `Sepal.Length` would hypothetically be 4.3066.
+
+To get even more information about the model you created, like its **residual standard error**, $\sigma = \sqrt{\frac{\textit{RSS}}{n-k-1}}$), or the $R^2$ (how much of the total variation in $Y$ is explained by our model $\hat{Y}$?), you can call `summary` on your model:
+```{r}
+summary(length_model)
+```
+
+The "residual square error" is 0.407, which is quite tiny! Our model fits evidently fits quite well. Indeed, by verifying the "Multiple R-squared" of our model, we can see that it explains $76%$ of the variation in `Sepal.Length`. The other statistics on each coefficient (e.g. the asterisks next to each) indicate that we are very certain that a relationship between `Petal.Length` and `Sepal.Length` does in fact exist.
+
+### Assumptions (and Limitations) of Linear Regression
+
+Simple as it is, linear regression comes with rigid assumptions. If you fit a linear regression model to data that does not actually maintain these assumptions itself, *your linear regression model means absolutely nothing*, and will likely suffer from either model bias or high variability of results. Fortunately, we can quickly check if these assumptions hold for our data graphically. Sometimes, this involves graphing a scatter plot of $X$ and $Y$. Other times, it's easier to construct a **residual plot**, which places the explanatory variable's $X_i$ on the x-axis and the **residuals**, or individual errors, $e_i$ on the y-axis. We will showcase how to verify these assumptions shortly.
+
+The essential assumptions underlying linear regression are as follows:   
+1. **Linearity**: The relationship between $X$ and $Y$ must be linear. Graphically, the scatterplot should show a linear trend, and the residuals plot should show no curvature.    
+2. **Constant Variance of Errors**: The "spread" of our errors should not depend on the value of $X$. Put in another way, our model should perform just as well predicting $Y$, regardless of which $X$ it is considering. Graphically, the residuals plot should show a band of roughly constant width.    
+3. **Normality of Error**: Even more stringently, the distribution of our residuals should be roughly normal. This is the most strict assumption of the linear model, but also gives it all of its statistical interpretability. Graphically, you can verify this assumption by graphing a density plot of the residuals.  
+
+Apart from these three statistical assumptions, there are a couple of other desirable attributes that make our linear regression analysis a bit more robust:   
+4. **Wide Distribution of Explanatory Variable(s)**: We would like to have as wide a range of $X$ values as possible. In fact, if all the $x$'s are of the same value, we cannot fit a linear regression model at all. Graphically, this can be quickly checked by constructing a density plot of the individual $X$ variables.   
+5. **Few Outliers**: Linear regression is particularily sensitive to **outliers**, datapoints that do not fit with the general trend. Outliers, especially outliers far from the center of our data cloud, can easily skew our regression line. You should always pinpoint, identify, and explain outliers in your data before running a regression analysis.
+
+Let's check through all three assumptions and two desirables for our `Sepal.Length`/`Petal.Length` model. Before we do this, however, I need to introduce a very simple, but tremendously useful package for model evaluation: `broom`.
+
+### A Brief Detour: `broom`
+
+`broom` is a package for turning models into dataframes! There are only three `broom` functions: `augment`, `tidy`, and `glance`. 
+
+`augment` will accept a model and output the same dataframe that was used to construct the model, but also include columns about the predicted $\hat{y}$, residual, and more for each row. Check out the output of `augment` on our `length_model`:
+```{r}
+augment(length_model) %>% sample_n(3)
+```
+
+As you can see, the `.fitted` values are quite close to those of `Sepal.Length`.
+
+`tidy` will accept a model and output a dataframe representing its model output, as seen in its `summary`. This outputted dataframe will have one row for each parameter - in this case, one for $\hat{\alpha}$ and one for $\hat{\beta}$. Observe the output of `tidy` for our `length_model`:
+```{r}
+tidy(length_model)
+```
+
+You can go back and verify that these values match those in the `summary(length_model)` code chunk above.
+
+`glance` will accept a model and output a single row, representing the performance of the model on the dataset as a whole. Again, these values will match those at the bottom of what's seen in `summary`. Observe the output of `glance` for our `length_model`:
+```{r}
+glance(length_model)
+```
+
+Now, let's get back to verifying the assumptions of our linear regression model on the `iris` dataset. First, let's check for linearity by reproducing the scatterplot of their relationships:
+```{r}
+ggplot(iris, aes(Petal.Length, Sepal.Length)) +
+  geom_point() + geom_smooth(method = "lm")
+```
+
+They look roughly linear! We can double-check with a residuals plot using the `broom` package.
+```{r}
+length_model %>% augment %>%
+  transmute(Petal.Length, Error = .resid) %>%
+  ggplot(aes(Petal.Length, Error)) + 
+  geom_point() + geom_hline(yintercept = 0, col = "red", linetype = "dashed")
+```
+
+The residuals don't show a curve or pattern, so the linearity assumption holds.
+
+Additionally, the band of residuals around the $y=0$ line seems to be fairly consistent regardless of the value of $x$ (aka `Petal.Length`). So, the second assumption, constant variance for the residuals, holds as well.
+
+Finally, we wish to check for the normality assumption, so let's make a density plot of the residuals:
+```{r}
+length_model %>% augment %>%
+  transmute(Error = .resid) %>%
+  ggplot(aes(Error)) + geom_density(fill = "grey")
+```
+
+Ooh, how deliciously normal! It's safe to say that all three of the fundamental assumptions of linear regression hold for the `Petal.Length` and `Sepal.Length` variables of the `iris` dataset. 
+
+Just to check up on some of the desirable properties of linear regression, let's check for outliers and a wide distribution of `Petal.Length`. As we can see in the scatterplot above, there seems to be a fairly wide distribution of `Petal.Length`, ranging from 1 centimeter to 6.9 centimeters. Furthermore, although there definitely seems to be a cluster of `Petal.Length`'s around 1.5cm, there don't seem to be any notable outliers that we need to evaluate.
+
+Now that we've gotten down the basics of linear regression, including how to use `ggplot2` and `broom` to check for all of its assumptions, let's look at a more general form of linear regression, polynomial regression.
+
+## Polynomial Regression
+```{r, echo = F}
+nonlinear_dataset <- data.frame(x = rep(seq(-5, 10, .25), each = 5)) %>%
+  mutate(y = rnorm(305, (2*x^3- 6*x^2 - 2*x - 14)/10, 10))
+```
+
+Obviously, the linearity assumption of linear regression is very strong, and not all relationships we find in real life will be as strong. For example, consider this illustrative dataset, with a clear nonlinear relationship:
+```{r}
+ggplot(nonlinear_dataset, aes(x,y)) + geom_point() + geom_smooth(method ="lm")
+```
+
+Clearly, if we fit a line to it, it's fundamentally **biased**, or systematically "misses" the true relationship in the data. This type of systematic mistake is called **underfitting**, because our model is not complex enough to capture the patterns in our data. This can be seen even more clearly in the shape of our residual plot:
+```{r}
+linear_model <- lm(nonlinear_dataset, formula = y ~ x)
+linear_model %>% augment %>%
+  ggplot(aes(x, .resid)) + geom_point() + 
+  geom_hline(yintercept = 0, col = "red", linetype = "dashed")
+```
+
+The linearity assumption implies that the residual plot should have no discernable pattern - however, in this case, a clear curve is immediately evident. This is evidence of the strong bias linear regression has for non-linear data. 
+
+Of course, with our human eyes, we can clearly see that this is some sort of quadratic or cubic relationship. If only we could specify that we wanted to fit a polynomial, rather than linear model to our data...
+
+**Polynomial regression** is an immediate extension of linear regression to account for polynomial relationships. If you recall from your theoretical math classes, polynomials are useful because they can approximate most functions arbitrarily well. So, with polynomial regression, our model becomes more complex, and therefore more suspectible to random **variations** in our data, but less rigid, therefore able to avoid **bias** a bit better. 
+
+This last point is worth repeating: although increasing model complexity *reduces bias*, it also makes the model more susceptible to *picking up random noise* as genuine structure in the data. Since our data is almost always a sample of our true population, we do not want to overly consider our sample, since what's true for the sample may not be true for the population in general. This phenomenon, the counterpart to bias, is called **variance** because it is a class of error that comes from the *sampling variablity* of the dataset we are training the model on.
+
+To use polynomial regression in R, simply use the `poly` helper function. The syntax for this function is `poly(x, d)`, and its output will be an orthogonal polynomial of degree d, evaluated at the points in `x`. This behavior is much clearly to see in illustration, so lets fit a 2-degree polynomial (aka quadratic) model to our nonlinear data:
+```{r}
+nonlinear_model <- lm(nonlinear_dataset, formula = y ~ poly(x, 2))
+summary(nonlinear_model)
+```
+
+We can of course graph this model using `geom_smooth` by changing the formula for our `lm` in the same fashion:
+```{r}
+nonlinear_dataset %>% ggplot(aes(x, y)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = y ~ x, col = "red") +
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), col = "blue")
+```    
+
+(*NOTE: when using formulas in `geom_smooth`, the formula must always use `y` and `x` as proxy variables for the true variable names*)
+
+Obviously, the blue quadratic of best fit has a lower sum of squared errors than the red linear fit. Let's compare the results of our two models for `nonlinear_dataset`, `linear_model` and `nonlinear_model`, more exactly. Just to make things more interesting, let's use `broom`'s `glance` package to display the differences as a dataframe. We will use `map_dfr` (of the `purrr` package) to apply the `glance` function to both `linear_model` and `nonlinear_model` and then combine them into a single dataframe, then label the rows just to make them easier to read:
+```{r}
+map_dfr(list(linear_model, nonlinear_model), glance) %>%
+  mutate(Model = c("Linear", "Quadratic")) %>%
+  select(Model, everything())
+```
+
+Our quadratic model performs better on every metric, with a higher $R^2$, and a smaller $\sigma$ (**sigma** is another name for the residual standard error).
+
+Perhaps overzealous with our sucess with the quadratic model, let's try an even more general model, a tenth-degree polynomial.
+```{r}
+nonlinear_dataset %>% ggplot(aes(x, y)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", formula = y ~ x, col = "red", alpha = .6) +
+  geom_smooth(method = "lm", formula = y ~ poly(x,2), col = "blue", alpha = .6) +
+  geom_smooth(method = "lm", formula = y ~ poly(x,10), col = "green", alpha = .6)
+```
+
+It still looks good! In fact, on paper, more complex models will always look better, in terms of $R^2$. 
+
+Let's make a simple function, `generate_poly_glance`, that generates a `glance` dataframe for an $n^{\textit{th}}$-degree polynomial regression model applied to the `nonlinear_dataset`. Then, we use `map_dfr` to bind together all the rows into a single dataframe, and then graph the $\textit{RSS}$ ($\sigma^2(n-k-1)$) and $R^2$ for each model as a function of model complexity:
+```{r}
+generate_poly_glance <- function(degree) {
+  lm(nonlinear_dataset, formula = y ~ poly(x,degree)) %>% glance
+}
+
+models<- map_dfr(1:20, generate_poly_glance, .id = "Model Degree") %>%
+  mutate(`Model Degree` = as.numeric(`Model Degree`),
+         `Residual Sum of Squares` = sigma^2 * (nrow(nonlinear_dataset) - 2),
+         `R-squared` = r.squared) 
+
+models %>% select(`Model Degree`, `R-squared`, `Residual Sum of Squares`) %>% head(10)
+```
+```{r}
+  ggplot(models, aes(`Model Degree`, `R-squared`)) +
+  geom_point(size = 2) + geom_line(size = 2) 
+
+  ggplot(models, aes(`Model Degree`, `Residual Sum of Squares`)) +
+  geom_point(size = 2) + geom_line(size = 2) + scale_y_log10()
+```
+
+Hmm... the `R^2` value seems to just get better and better. In fact, it is a statistical theorem that $R^2$ will always increase with model complexity - one of the reasons $R^2$ is not an effective metric for model fit for complex or high-dimensional data. In fact, a metric called *Adjusted* $R^2$ was developed to adjust the $R^2$ to resist arbitrary inflation from adding more and more variables.
+
+
+## Model Selection with `broom`
+
+The problem with our current method for model evaluation is that we may end up **overfitting** to our data. That is, given that there is some amount of random noise in our data, our complex models may end up getting confused by these errors, interpreting them as literal, but complex, patterns in our data. For example, observe the fit of a 25-degree polynomial to our noisy, quadratic data:
+```{r}
+ggplot(nonlinear_dataset, aes(x,y)) + geom_point() + geom_smooth(method = "lm", formula = y ~ poly(x,25), size = 2)
+```
+
+Especially near the ends of our data, we see these perturbations in our model, that are clearly misinterpretations of the noise in our data. How can we decide, then, which polynomial fit is best? 
+
+We need a method that trains a model on only a sample of the data (called the **test set**), and then validates that model on a different sample of the data (the **validation set**). That way, when we evaluate our models, we are seeking to minimize the **validation error**, which is not directly affected by the optimization of the model as it trains on the **training data**. Put another way, polynomial and linear regression will always minimize their error on the **training data**, and then we look to the **validation error** to see how the model performs on new data. After all, **Objective III** concerns *additional data*, so better and better performance on the same training data can very easily transform into *overfitting*, when the model performs really well on *training data* but not so well on new *validation data*.
+
+At the heart of machine learning is **model selection**. Essentially, you try to **tune** a hyperparameter (e.g. the degree of our polynomial regression) by training the data on part of the data, then validating its performance on a different part of the data. A **hyperparameter** is simply a paramater (like $\alpha$ or $\beta$), but it determines which *family* of model you're using - in this case, which degree polynomial our model is.
+
+Let's make a function that trains a model on some of the data in `nonlinear_dataset`, then tests it on other data in `nonlinear_data` to make an entry to dataframe of model errors. We will then graph the sum of square validation error of these models to see which degree we should pick.
+```{r}
+training_set = nonlinear_dataset %>% sample_frac(.4)
+validation_set = setdiff(nonlinear_dataset, training_set)
+
+generate_poly_validation <- function(degree) {
+  lm(training_set, formula = y ~ poly(x,degree)) %>% 
+    augment(newdata = validation_set) %>%
+    summarise(`Residual Sum of Squares (Validation Set)` = sum((y - .fitted)^2)) %>%
+    mutate(`Model Degree` = degree)
+}
+```
+
+Now let's use `mapdfr` again to graph the validation errors of each model:
+```{r}
+model_validations <- map_dfr(1:20, generate_poly_validation)
+ggplot(model_validations, aes(`Model Degree`, `Residual Sum of Squares (Validation Set)`)) +
+  geom_point(size = 2) + geom_line(size = 2)
+head(model_validations, 10)
+```
+
+The one-degree and two-degree (linear and quadratic, respectively) models have too much error, diminishing the visibility of the other models. This is due to their **bias**, or strong rigidity, that prevents them from effectively capturing the underlying structure of the data.
+
+Let's "zoom-in" on just the `degree > 2` models by filtering `model_validations` before graphing it:
+```{r}
+model_validations %>% filter(`Model Degree` > 2) %>% 
+  ggplot(aes(`Model Degree`, `Residual Sum of Squares (Validation Set)`)) +
+  geom_point(size = 2) + geom_line(size = 2) + scale_x_continuous(minor_breaks = 3:20)
+```
+
+Interestingly, even though one-degree and two-degree polynomial regression performs poorly, using a cubic (`degree = 3`) polynomial model works better than more complex models. So, our validation tells us that the best fit for new data is a third-degree polynomial model, which achieves the best balance between the model bias (**underfitting**) of  simple models and the model variance (**overfitting**) of complex models. This makes sense, since this data secretly arises from a cubic polynomial originally anyway. The tradeoff between simple and complex models is infamously known as the **bias-variance tradeoff** and its role in **model selection** is an essential concept in machine learning.
+
+In more advanced courses, you will learn a more effective method for validation called **cross-validation**. Essentially, cross-validation will conduct a similar validation process to that outlined above, but several times, and then average the results. That way, we get rid of even the sampling variance in our validation set.
+
+For now though, we've gone through a lot! We've covered the objectives of data science, effective data visualization with `ggplot2`, and R's built-in function for linear and polynomial regression, `lm`, as well as how the `broom` package can be used to turn models into dataframes, and therefore graphs. We've also touched upon some of the essentials of machine learning, like the bias-variance tradeoff, how to do conduct validation, and the sum of square errors metric. 
+
+# Mini-projects
+
+There are two mini-projects for this tutorial, designed to give you practice with EDA and more advanced model selection. Find the full project specifications in the [mini-project section of the r3-workbook](r3-workbook.Rmd#mini-projects).
+
+## Exploratory Data Analysis
+
+Exploratory Data Analysis (**EDA**) is the process of using summary data and data visualization to get a sense of the underlying structures within your data *before* analysis. It's a fairly creative process, and like most creative processes, the best way to learn how to do EDA effectively is with practice. In this mini-project, you will explore either either the `diamonds` or the `mpg` dataset, noting any unusual relationships or outliers. 
+
+## Validation & Elastic Net Regression
+
+Now that you're familiar with graphing with `ggplot2` and model selection with `broom`, try your skills at this fairly advanced graphing exercise with the `mpg` dataset. You will learn a new type of regression, **elastic net regression**, which has a continuous hyperparameter for you to tune! You will use function definitions to **grid search** hyperparameters, construct a dataframe of various models for predicting the `hwy` of each car with `broom`, and finally graph your validation process with `ggplot2.`
+
+### Elastic Net Regression
+
+Especially in this age of "Big Data" buzz and the now ubiquitous nature of information, you will from time to time come across datasets with a very, very large number of explanatory variables (also called **features** or **predictors**). The challenge in making a model to capture the effects of these predictors on some response variable is we might grow unsure of which features are actually important to the underlying structure of the response variable. This is especially harmful because too many useless predictors can decrease your confidence in the structure of the data, especially if they fail to reveal any new information about the response. How can you select which predictors to include or exclude from your analysis when you have hundreds of potential variables? 
+
+One problem with multivariate linear regression is that our error metric, the sum of squared errors (aka the **residual sum of squares**, $RSS$), is fairly simple. We could easily add a few more terms to it to penalize things like, the total "length" of our predicted slope parameters, $\sum |\hat{\beta_i}|^2$, or a "selection" penality, $\sum |\hat{\beta_i}|$. If we add these new penalties, along with **regularization hyperparameters** $\lambda_1$ and $\lambda_2$ to weight them, the matrix form of our objective function for elastic net regression is:
+
+$$z_{\lambda_1,\lambda_2}(B) = \sum|y - XB|^2 + \lambda_1\sum|\hat{\beta_i}| + \lambda_2\sum|\hat{\beta_i}|^2$$
+
+If we write $\lambda_1 = \alpha \lambda$ and $\lambda_2 = \frac{(1-\alpha)}{2} \lambda$, we arrive at our final parameterization of the objective function for elastic net regression:
+
+$$z_{\alpha, \lambda}(B) = \sum|y - XB|^2 + \lambda\left(\alpha\sum|\hat{\beta_i}| + \sum|\hat{\beta_i}|^2\right)$$
+
+Now, the trick is to pick various $\alpha_i$ and $\lambda_i$, train our $B$ on the training test, and then compute the $z_{(\alpha_i, \lambda_i)}$ for each $(\alpha_i,\lambda_i)$  for comparison. We will then choose the $\alpha^*$ and $\lambda^*$ that minimize our **validation error**, $z_{(\alpha, \lambda)}$. While this seems like a lot of work at first, the package we'll learn in R to do this actually finds the optimal $B$ and $\lambda$ for you. It's your job to find the best $\alpha$ between $0$ and $1$. 
+
+To use elastic net regression in R, install the `glmnet` and `glmnetUtils` packages. The `cv.glmnet(formula, data, alpha)` function will find the model with the best $\lambda$ and $\beta$ for a given $\alpha$. Once you have such a model with `cv.glmnet`, use `predict(model, newdata, s = "lambda.min")` to find the predicted values for the response variable.
+
+As a quick example, suppose we wanted to fit an ($\alpha = 0$) elastic net to predict the `price` of a diamond given its `carat`, `depth`, and `table`, and then wanted to graphically compare the predicted values with the actual diamond prices as well as the predicted values from a linear model. Note that in this example, we don't manually split our data into training and validation sets - you'll have to do that in your project. The following code is fairly advanced, but you should be able to understand all of it with a few read-overs. Feel free to email [`contact@arun.run`](mailto:contact@arun.run) with any questions about the code and its output.
+```{r}
+## Making elastic and linear models
+diamond_model_elastic <- cv.glmnet(formula = price ~ carat + depth + table, data = diamonds, alpha = 1)
+diamond_model_linear <- lm(formula = price ~ carat + depth + table, data = diamonds)
+
+## Notice that the best lambda is 403.5063, called "lambda.min"
+print(diamond_model_elastic)
+glance(diamond_model_elastic)
+
+## Comparing predictions with actual prices
+diamond_predictions_elastic <- diamond_model_elastic %>% predict(newdata = diamonds, s = "lambda.min") %>% as.numeric
+diamond_predictions_linear <- diamond_model_linear %>% predict(newdata = diamonds)
+diamond_actual <- diamonds %>% pull(price)
+
+## Create a dataframe of model outputs for each diamond
+diamonds_diagnostic <- 
+  data.frame(`Actual` = diamond_actual, `Predicted (lm)` = diamond_predictions_linear, `Predicted (glmnet)` = diamond_predictions_elastic, check.names = F) 
+
+## Plot Model Outputs
+diamonds_diagnostic %>% gather(Model, Prediction, - Actual) %>%
+  ggplot(aes(Actual)) + 
+  geom_line(aes(y = Prediction, col = Model), alpha = .4) +
+  geom_line(aes(y = Actual), col = "black", linetype = "dashed") + facet_wrap(~ Model) +
+  labs(x = "Diamond Price (Actual)", y = "Diamond Price (Predicted)", title = "Elastic Net vs Linear Model for Diamond Price Prediction") +
+  theme(legend.position = "bottom")
+
+## Plot Model Performances
+diamonds_performance <- diamonds_diagnostic %>% 
+  summarise(`RSS (lm)` = sum((`Predicted (lm)` - `Actual`)^2), `RSS (glmnet)` = sum((`Predicted (glmnet)` - `Actual`)^2)) %>%
+  gather(Model, RSS) %>% mutate(Model = str_extract(Model, pattern = "\\(.*\\)") %>% str_sub(2, -2))
+print(diamonds_performance)
+```
+
+Interestingly, both the elastic net model and the linear regression model seem to overvalue cheap diamonds and undervalue expensive diamonds, and the linear model actually performs slightly better. There are two reasons why this could have occured - linear regression might be better suited to this prediction task (*"better" algorithms aren't always better!*), or we could have chosen the wrong $\alpha$ (*note that we haven't used validation to select the optimal* $\alpha$!). 
+
+This ends our brief introduction into elastic net regression. For more information on how to use `glmnet`, read the [official Quick Start guide](https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html). 
+
+In the [mini-project for Elastic Net Regression](r3-workbook.Rmd#mini-projects), you will be guided through a few steps that will help you preform a similar model selection process to what we went through above for polynomial regression. As always, please email [`contact@arun.run`](mailto:contact@arun.run) with any questions or for hints whatsoever. Happy machine learning!
+
+# Conclusion
+
+This ends our textbook-style tutorial on data visualization with `ggplot2` and an introduction into the first of our machine learning algorithms, linear regression with `lm` and `broom`. For more practice, check out [the mini-project](r3-workbook.Rmd#mini-projects) section of `r3-workbook`.
+
+## Sneakpeek at `advr1`
+This marks the end of our introductory series into R programming! Congratulations on making it this far. By now, you should be able to begin your own foray into data cleaning, data visualization, and data analysis. Stay tuned in two weeks for `advr1`, the SUSA crash course introduction to neural nets in R!
+
+# Additional Reading
+* The premier free online textbook for R, written by one of the leading developers of the R ecosystem, ["R for Data Science" can be found here](http://r4ds.had.co.nz/). In particular, the [chapter on **data visualization**](http://r4ds.had.co.nz/data-visualisation.html) and [chapter on **data reporting**](http://r4ds.had.co.nz/graphics-for-communication.html) are especially helpful for this workshop.  
+* The follow-up textbook to ["R for Data Science"](http://r4ds.had.co.nz/), ["Advanced R", can be found here](http://adv-r.had.co.nz/).
+* RStudio hosts a [collection of cheatsheets](https://www.rstudio.com/resources/cheatsheets/) designed to make referencing `tidyverse` and other packages more visual. The relevant sheets to this tutorial are:   
+    - [ggplot2 Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+    - [Data Wrangling Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf): Contains information on `dplyr` and `tidyr` functions as applied to manipulating dataframes    
+    - [Data Import Cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf): Contains information on `readr` and `tidyr` functions as applied to reading and cleaning data   
+    - [Functional Programming Cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf): Contains information on the `*apply` family as well as `purrr`   
+    - [String Manipulation Cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf): Contains information on the `stringr` package for text manipulation    
+* For more packages that are useful with `ggplot2`, check out:  
+    - `ggthemr`  
+    - `plotly::ggplotly`  
+    - `ggmap`   
+    - `sf`  
+* For more information on the `tidyverse` packages, visit the official [tidyverse package listing](https://www.tidyverse.org/packages/).  
+* For an interactive guide to learning R and Python, visit [DataCamp](https://www.datacamp.com/) a paid tutorial website for learning data computing.

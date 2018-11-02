@@ -1,0 +1,275 @@
+---
+title: Introduction to R
+subtitle: "Part 3: Data Visualization and Data Analysis"
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by [Arun Ramamurthy](mailto:contact@arun.run)."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+```{r, echo = F}
+knitr::opts_chunk$set(eval = F)
+```
+
+# About this Document
+This is the associated workbook for the [r3](r3.html) tutorial on data visualization and analysis in R. Unlike the previous workshops, this workbook will not be problem set, but project-focused. After all, graphing is fairly subjective, and a creative process requires time trying various approaches to the same problem. 
+
+Using RStudio, replace each ` > TODO ` with a code chunk that answers the associated problem. Then, run the chunk to verify your answers. Some problems require a non-code answer, so simply replace ` > TODO ` with the correct textual answer.
+
+# Data Visualization with `ggplot2`
+
+## Tips for Data Viusalization
+
+What does "tell a story" mean to you? How can you apply your storytelling skills to data visualization?
+
+> TODO 
+
+Argue for a counter-example usecase for one of the tips listed in this tutorial. When would it actually be a good idea to do the reverse?
+
+> TODO
+
+In the tutorial, I advise that you stay away from double-axis graphs. Why? In what way can a data scientist intentionally mislead with them?
+
+> TODO
+
+## Vocabulary for Data Visualization
+
+Briefly define the following terms in your own words:   
+- *geom*  
+- *aesthetic*  
+- *glyph*  
+- *layer*
+
+> TODO
+
+## Abstractions of Data Visualization
+
+Write the general workflow for constructing a ggplot, either with a code recipe, description, or story analogy.
+
+> TODO
+
+## `ggplot2`
+
+### `ggplot`, `aes`
+
+In your own words, describe the purpose and use of the `aes` function.
+
+> TODO
+
+`TRUE`/`FALSE`: The following command is equivalent to the example in this section:
+```{r}
+iris %>% ggplot(aes(y = Sepal.Length, x = ))
+```
+
+> TODO 
+
+Without running it in R first, draw or describe a quick sketch of the output of the following command:
+```{r}
+ggplot(iris, aes(Species))
+```
+
+> TODO
+
+## `geom_*`
+
+### `geom_point`, `geom_jitter`
+
+Without running them in R first, what are the differences between the outputs of the following lines of code? Which achieves the desired effect?
+
+```{r}
+ggplot(diamonds, aes(cut, clarity, alpha = .6), position = "jitter") + geom_point()
+ggplot(diamonds, aes(x = cut, y = clarity)) + geom_point(alpha = .6, position = "jitter")
+ggplot(diamonds) + geom_point(aes(x = cut, y = clarity, alpha = .6), position = "jitter")
+```
+
+> TODO
+
+#### `geom_histogram`, `geom_area(stat = "bin")`, `geom_density`
+
+Briefly, what are the differences between histograms, area plots, and density plots?
+
+> TODO
+
+How can you use the `color` specification to turn off the black edge of the following density plot?
+```{r}
+iris %>% ggplot(aes(Petal.Length)) + geom_density(fill = "orchid")
+### TODO: CHANGE THIS ^^^
+```
+
+#### `geom_bar`, `geom_col`
+
+Briefly, what is the difference between `geom_bar` and `geom_col`?
+
+> TODO 
+
+Comment in a brief explanation next to each line of the following code chunk:
+```{r}
+mpg %>% group_by(manufacturer) %>%
+  summarise(`Average HWY Fuel Economy` = mean(hwy)) %>%
+  mutate(manufacturer = factor(manufacturer,
+                               levels = manufacturer[order(`Average HWY Fuel Economy`)],
+                               ordered = T)) %>%
+  ggplot(aes(manufacturer, `Average HWY Fuel Economy`, fill = manufacturer)) + 
+  geom_col()
+```
+
+#### `geom_line`, `geom_smooth`
+
+What does `expand_limits` do? What is its syntax?
+
+> TODO
+
+Describe the `geom_smooth` layer. What are some of its arguments?
+
+> TODO
+
+### `facet_wrap`, `facet_grid`
+
+What is facetting? What are some use-cases you can think of for it? 
+
+> TODO
+
+What is the difference between `facet_wrap` and `facet_grid`, in terms of their purpose, syntax, and behavior?
+
+> TODO
+
+### `labs`, `theme`, `scale_*_*`
+
+How do you add axis and plot titles to a graph?
+
+> TODO
+
+Read the `theme` documentation. Pick some element in it, and describe what it corresponds to in a plot.
+
+> TODO
+
+Pick one of the linked packages or guides for colors in `ggplot2`. What was one feature you liked about it?
+
+> TODO
+
+# Data Analysis
+
+## What is Regression?
+
+In your own words, what is the difference between regression and classification?
+
+> TODO
+
+## Linear Regression
+
+### The Linear Regression Model
+
+Prove that, for any simple linear regression with intercept $\hat{\alpha} = \bar{y} - b \bar{x}$, the sum of the residuals is $\sum{e_i} = 0$.
+
+> TODO
+
+Use the First Derivative Test to derive the optimal $a^*$ and $b^*$ for the sum of squares objective function.
+
+> TODO
+
+### Linear Regression in R
+
+Use `lm` and `summary` to characterize the relationship between `carat` and `price` in the `diamonds` dataset. What effect does `carat` have on `price`? Also, make a ggplot of this simple linear regression to supplement your response.
+
+> TODO
+
+### Assumptions (and Limitations) of Linear Regression
+
+Briefly, what are the assumptions of the linear regression model? How might each be violated?
+
+> TODO
+
+Does the relationship between `carat` and `price` fit all the assumptions of linear regression? Verify them each graphically.
+
+> TODO
+
+### A Brief Detour: `broom`
+
+In your own words, what does each of `tidy`, `glance`, and `augment` do?
+
+> TODO
+
+The `do` function is a `dplyr` verb that applies a general process **by group**. Describe the purpose of each line of code in the code chunk below, and in light of the discussion of `cut`, `color`, `price`, and `carat` in the text, interpret the outputted plot.
+```{r}
+diamonds %>% 
+  group_by(cut, color) %>% 
+  do(lm(., formula = price ~ carat) %>% tidy) %>% 
+  filter(term == "carat") %>% 
+  ggplot(aes(cut, color, fill = estimate)) + 
+  geom_tile() + 
+  scale_fill_gradient2()
+## TODO: comment each line ^^^
+```
+
+## Polynomial Regression
+
+In your own words, what is underfitting? What is overfitting? What is the relationship between the two?
+
+> TODO 
+
+In your own words, what is the relationship between the degree of a polynomial regression model, its complexity, its bias, and its variance?
+
+> TODO
+
+## Model Selection with `broom`
+
+The code chunk in the text for simple validation of polynomial regression is a lot to look at at once, but breaks into parts easily. Describe the purpose of each line of code in the code chunk below.
+```{r}
+training_set = nonlinear_dataset %>% sample_frac(.6)
+validation_set = setdiff(nonlinear_dataset, training_set)
+
+generate_poly_validation <- function(degree) {
+  lm(training_set, formula = y ~ poly(x,degree)) %>% 
+    augment(newdata = validation_set) %>%
+    summarise(`Sum of Squared Error (Validation Set)` = sum((y - .fitted)^2)) %>%
+    mutate(`Model Degree` = degree)
+}
+## TODO: comment each line ^^^
+```
+
+# Mini-projects
+
+There are two mini-projects for this tutorial, designed to give you practice with EDA and more advanced model selection. 
+
+## Exploratory Data Analysis
+
+Exploratory Data Analysis (**EDA**) is the process of using summary data and data visualization to get a sense of the underlying structures within your data *before* analysis. It's a fairly creative process, and like most creative processes, the best way to learn how to do EDA effectively is with practice. In this mini-project, you will explore either either the `diamonds` or the `mpg` dataset, noting any unusual relationships or outliers. For tips, review all the functions in [`r3`](r3.html). Feel free to email [`contact@arun.run`](mailto:contact@arun.run) with any questions or for hints.
+
+### I.
+
+Pick either `diamonds`, a dataset of over fifty-thousand diamonds, or `mpg`, a dataset of over two-hundred cars. Use `str`, `?` and `View` to look at them in tabular form. What does each column represent? What does each row represent?
+
+### 2.
+
+Now that you've familiarized yourself with the dataset, make three graphs, each revealing some sort of pattern, trend, or relationship in the dataset. Consult the [ggplot2 Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) for ideas on what kinds of geoms you can use to visualize various aspects of the data.
+
+### 3. 
+
+For one of the trends you found in your data, use `geom_smooth`, `geom_smooth(method = "lm")`, `lm`, and `summary` to interpret the trend. Write a couple of short sentences interpreting and offering plausible explanation for the trends.
+
+## Validation & Elastic Net Regression
+
+Now that you're familiar with graphing with `ggplot2` and model selection with `broom`, try your skills at this fairly advanced graphing exercise with the `mpg` dataset. You will learn a new type of regression, **elastic net regression**, which has a continuous hyperparameter for you to tune! You will use function definitions to **grid search** hyperparameters, construct a dataframe of various models for predicting the `hwy` of each car with `broom`, and finally graph your validation process with `ggplot2.` For tips, review all the functions in [`r3`](r3.html). Feel free to email [`contact@arun.run`](mailto:contact@arun.run) with any questions or for hints.
+
+### 1.
+
+Review the [Elastic Net Regression](r3.html#elastic-net-regression) section of [`r3`](r3.html). Ensure you understand the code in the [Polynomial Regression](r3.html#polyomial-regression) which generates rows of a dataframe displaying the **validation accuracy** of different models on the same **training set** and **validation set**, as well as the **bias-variance tradeoff** and how it pertains to model selection. Feel free to email [`contact@arun.run`](mailto:contact@arun.run) with any questions or for hints about the concepts or code.
+
+### 2. 
+
+Write a code chunk that first splits the `mpg` dataset into a **training set** (randomly selected $70\%$ of your data) and **validation set** (the other $30\%$.)
+
+### 3.
+
+Make a function called `generate_elastic_model(alpha)`, which generates an elastic net model trained on the training set, for some alpha. The output of the function should a `cv.glmnet` model. The response variable is `hwy`, and you can use any number of the remaining 10 variables as predictors.
+
+### 4.
+
+Make a function called `validate_elastic_model(model)`, which returns the RSS (residual sum of squares) for a given `cv.glmnet` model of some alpha. 
+
+### 5.
+
+Using `purrr` and other `tidyverse` libraries, create a ggplot with `alpha` on the x-axis and `RSS` on the y-axis. What is the optimal alpha for using an elastic net model to predict `hwy` given your predictors?
+

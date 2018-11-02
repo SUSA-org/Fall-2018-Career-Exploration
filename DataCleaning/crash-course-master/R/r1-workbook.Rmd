@@ -1,0 +1,306 @@
+---
+title: Introduction to R
+subtitle: "Part 1: Base R & tidyverse (Associated Workbook)" 
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+```{r, echo = F}
+knitr::opts_chunk$set(eval = F)
+```
+
+# About this Document
+This is the associated workbook for the [r1](r1.html) tutorial on R programming. Using RStudio, replace each ` > TODO ` with a code chunk that answers the associated problem. Then, run the chunk to verify your answers. Some problems require a non-code answer, so simply replace ` > TODO ` with the correct textual answer.
+
+
+# R Markdown
+Make an empty chunk below:  
+
+> TODO
+
+Make and run a chunk that outputs "Hello SUSA!", using the `print` function:  
+
+> TODO 
+
+How do you make text bold in R Markdown? How would you make text italics in R Markdown? (The R Markdown in the [Additional Reading section](r1.html#additional-reading) should be helpful here.)  
+
+> TODO
+
+# Base R 
+## Basic R
+### Syntax
+Copy the following code chunk. Comment out the a single line, so that the output is `12` rather than `20`.
+```{r}
+a = 3 + 3 * 3
+a = 4 * 4 + 4
+a
+```  
+> TODO
+
+### Expressions
+Write an arithmetic expression to find the mean of the first five positive integers.  
+
+> TODO
+
+Write an arithmetic expression that uses the modulo and equality operators to test if a number is even or odd.   
+
+> TODO
+ 
+### Variables & Assignment
+Make a set of variable assignments to find the larger root of $x^2 + 4x - 2$
+
+> TODO 
+
+```{r}
+(-b+sqrt(b^2-4*a*c))/(2*a)
+```
+Make a variable named "susa magic" that evaluates to the value you computed above, without typing any numbers.
+
+> TODO
+
+### Atomic Objects
+What are the two properties of atomic objects in R?
+
+> TODO
+
+#### Types
+
+##### Numerics
+Create a numeric for one million using scientific notation.
+
+> TODO 
+
+What type is `pi`?
+
+> TODO
+
+##### Logicals
+
+What numeric quantity is associated with `FALSE`?
+
+> TODO
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+0 | T
+```
+
+
+> TODO
+
+##### Characters
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+'pi' == pi
+```
+
+> TODO
+
+What does the `paste` function do?
+
+> TODO
+
+#### Vectors
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+c(1) == 1
+```
+
+
+> TODO
+
+##### Vector Basics
+
+Name two uses of the `c` function.
+
+> TODO
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+length(c(1,10,2,3,1))
+```
+
+##### Vectorized Functionality
+
+Use a vector and an operation to find the first 10 powers of 2.
+
+> TODO
+
+##### Flattening
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+c(0, "TRUE", FALSE)
+```
+
+##### Subsetting Vectors
+
+What are the three ways to subset vectors?
+
+> TODO
+
+Use all three ways to subset the vector `v` to get just the first and last values:
+```{r}
+v <- c("red" = 4, "blue" = 0, "green" = 2)
+## TODO 1
+## TODO 2
+## TODO 3
+```
+
+Add a line of code to the chunk below to output all the elements in the vector that are even, without manually specifying their indicies. You will find the modulus operator helpful here.
+```{r}
+v <- 1:100
+## TODO
+```
+
+### Lists
+
+What is the difference between a vector and a list?
+
+> TODO
+
+Make a list containing your favorite color, your age, and a logical indicating if you have pets or not.
+ 
+> TODO
+
+Now, put that list into a new list, along with your current home address. How many elements does your list have?
+
+> TODO
+
+Extract your favorite color from this new list.
+
+> TODO
+
+### Functions
+
+What is the syntax to use a function in R?
+
+> TODO
+
+#### Using Functions
+
+Find the square root of $e$. You will find the `exp` function useful here.
+
+> TODO
+
+What is the default value of the `digits` argument of the `round` function? 
+
+> TODO
+
+#### Writing Functions
+
+Write a function to test if a number is odd. Use it to determine all the odd values of the first 20 squares.
+
+> TODO
+
+Write a function `susa(x, a, b)` which returns $x^{\frac{a}{b}}$. By default, it should return the square root of `x`. 
+
+> TODO
+
+## Dataframes
+
+### Constructing Dataframes
+
+Make a dataframe containing the first name, last name, favorite ice cream flavor, and approximate height of four other CX members. Include yourself in this dataframe for a total of five entries.
+
+> TODO
+
+Verify the types and structure of your dataframe.
+
+> TODO
+
+### Subsetting Dataframes
+
+Using the dataframe from the previous section, make a subset of the dataframe that only contains the name information.
+
+> TODO
+
+Extract the row associated with you from your dataframe.
+
+> TODO
+
+## RDS Files
+
+Read the documentation of `saveRDS`. What are its arguments?
+
+> TODO
+
+Read the documentation of `readRDS`. What are its arguments?
+
+> TODO
+
+Using `saveRDS` and `readRDS`, trade your dataframe from above with the person next to you via Slack. Read their dataframe and check its contents.
+
+> TODO
+
+# Installing & Using Packages
+
+In your own words, what is a **package**?
+
+> TODO
+
+## Installing Packages
+
+When should you use `install.packages`? When should you use `library`?
+
+> TODO
+
+Install and load the `ubeR` package, a package that allows you to use Uber's API to look at your ride history and even request an Uber, all within R.
+
+> TODO
+
+## `magrittr`
+
+In your own words, what is a **pipe**? Why is it useful?
+
+> TODO 
+
+Name three aliases included in the `magrittr` package that weren't included in `r1`.
+
+> TODO
+
+Using piping, reconstruct the Quadratic Formula above to find the larger root of $16x^2 + 14x - 20$.
+```{r}
+a <- 16
+b <- 14
+c <- -20
+## TODO
+```
+
+In your own words, what does the `%<>%` pipe do?
+
+> TODO
+
+## `stringr`
+
+There is another function we learned early on in `r1` that operates identically to `str_length`. What is that function?
+
+> TODO
+
+Use `str_sub` to edit the string below to read `"(Your name) is awesome!"`
+```{r}
+x <- "CX is awesome."
+## TODO
+```
+
+Read the documentation for `str_trim`. Then, use `str_trim` to edit the string below to read `"    Hello world!"`
+```{r}
+x <- "    Hello world!        "
+## TODO
+```
+
+Use `str_detect` to make a new vector of all the strings in `x` that contain the letter `a`.
+```{r}
+x <- c("asdf", "have a great day!", "SUSA", "susa", "cx", "cx is awesome")
+## TODO
+```
+
+Use `stringr` to replace all the vowels in your name with capital vowels. The adventurous of you could use the regex guide in the [Additional Reading section](r1.html#additional-reading), but repeated calls to `str_replace_all` would work as well.
+
+> TODO

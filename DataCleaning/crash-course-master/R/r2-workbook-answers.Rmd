@@ -1,0 +1,394 @@
+---
+title: Introduction to R
+subtitle: "Part 2: Data Wrangling with the `tidyverse`"
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+```{r, echo = F, message=F}
+knitr::opts_chunk$set(eval = F);library(magrittr);library(tidyverse)
+```
+
+# About this Document
+This is the answer manual to the associated workbook for the [r2](r1.html) tutorial on R programming, [r2-workbook](r2-workbook.Rmd).
+
+# Data Wranging
+
+## `dplyr`
+
+### `head`, `View`, `arrange`
+
+A pop-quiz on `%>%` from the `magrittr` package! Write a command to view the `iris` dataset in two ways, one with piping and one without. What do you notice about the tab titles of each?
+```{r}
+View(iris)
+iris %>% View
+```
+
+Notice that the tab name of `View(iris)` is `iris`, and the tab name of `iris %>% View` is `.`. This behavior is related to non-standard evaluation (NSE) in R, as well as the `.` placecard in `magrittr`.
+
+
+Use `head` to read the first ten lines of the `iris` dataset.
+```{r}
+head(iris)
+```
+
+Read the documentation of `head`. How could we easily see the **last** ten lines of the `iris` dataset?
+```{r}
+tail(iris, 10)
+```
+
+
+Using `View`, see if you can find out how many entries are in the `iris` dataset.
+
+After running `View(iris)`, the number of entries/rows (150) can be seen in the lower-left corner.
+
+Using `desc` and `tail`, find an alternative command to find the shortest six petals in the `iris` dataset.
+```{r}
+iris %>% arrange(desc(Petal.Length)) %>% tail
+```
+
+
+### Dataframe Subsetting
+
+#### Row Selection (`sample_*`, `slice`, `filter`)
+
+Read the documentation for `sample_n` to determine how to sample **with replacement**. Using the following dataframe, simulate ten rolls of a die.
+```{r}
+dice <- data.frame(Dots = 1:6)
+dice %>% sample_n(size = 10, replace = T)
+```
+Notice that `Dots` yields our ten outcomes for the dice rolls, but the `rownames`, curiously, gives information about the cumulative counts of specific outcomes over the rolls.
+
+Use `sample_n` and `nrow` (outputs the number of rows in a dataframe) to write `scramble`, a function that takes in a dataframe and outputs the same dataframe in a scrambled order.
+```{r}
+scramble <- function(df) {df %>% sample_n(size = nrow(.))}
+scramble(dice) ## Just to show function behavior
+```
+
+
+Using `slice`, write `my_head`, a function that operates identically to the default behavior of the `head` function. Use the following function header:
+```{r}
+my_head <- function(df, size = 6) {
+  df %>% slice(1:size)
+}
+my_head(iris) ## Just to show function behavior
+head(iris) ## For comparison - QUIZ: How does head's output differ from my_head's output?
+```
+
+
+Select only the setosa flowers in `iris` with Sepal.Length's over 5.
+```{r}
+iris %>% filter(Sepal.Length > 5)
+```
+
+
+#### Column Selection (`select`, `rename`, `pull`)
+
+Use `select` to make a sub-dataframe of `iris` with only the columns about lengths.
+```{r}
+iris %>% select(ends_with("Length"))
+```
+
+
+Rename the columns of `iris` to have more natural grammar. (Read: spaces rather than periods). 
+```{r}
+## Basic Solution
+iris %>% rename("Petal Length" = Petal.Length, "Petal Width" = "Petal.Width", 
+                `Sepal Length` = Sepal.Length, `Sepal Width` = "Sepal.Width") 
+## As you can see, you can either use ticks or quotes (no ticks needed for e.g. Petal.Length because it doesn't contain spaces)
+
+## Advanced Solution
+iris %>% rename_all(funs(str_replace(., pattern = "\\.", replacement = " ")))
+```
+
+
+In your own words, what is the difference betwee `select` and `pull`?
+
+  - `select` returns a dataframe, and multiple columns can be `select`ed
+  - `pull` returns a vector, and only one column can be `pull`ed
+
+In `r2`, what was the difference in behavior between using `select` vs. using `rename` on the `iris` dataset? How would you fix the `select` statement to work identically in this case?
+
+`select` will output the columns in the order they're stated in the `select` call. In contrast, `rename` never alters the order of the columns in the dataframe.
+```{r}
+iris %>% select(- Species, `Species Name` = Species) %>% head(1)
+iris %>% rename(`Species Name` = Species) %>% head(1) ## For comparison
+```
+
+
+Using `select`, write `my_rename`, a function that operates (nearly) identically to the default behavior of the `rename` function. Use the following function header:
+```{r}
+my_rename <- function(df, ...) {
+  df %>% select(..., everything())
+}
+iris %>% my_rename(A = Sepal.Length, B = Sepal.Width) %>% head(1) ## Just to showcase function behavior
+iris %>% rename(A = Sepal.Length, B = Sepal.Width) %>% head(1) ## For comparison
+```
+
+### Adding & Modifying Columns (`mutate`, `transmute`)
+
+#### `mutate`
+
+What are the two uses for `mutate`? 
+
+`mutate` can be used to:
+  - Modify existing columns of a dataframe
+  - Add new columns to a dataframe
+
+Use `mutate` to make a two new columns in `iris`, 1) `Petal/Sepal Width Ratio`, the ratio between `Petal.Width` and `Sepal.Width` and 2) `Petal Area`, using `Petal.Width` and `Petal.Length`.
+```{r}
+iris %>% mutate(`Petal/Sepal Width Ratio` = Petal.Width/Sepal.Width, `Petal Area` = Petal.Width*Petal.Length) %>% head(1)
+```
+
+
+In the above problem, what is the window function you used to calculate `Petal/Sepal Width Ratio`? What is the window function used to calculate `Petal Area`?
+
+The window function for `Petal/Sepal Width Ratio` was the divide operator, `/`. 
+The window function for `Petal Area` was the multiplication operator, `*`.
+
+Challenge question! Look up the documentation for `mutate_if`, and use it to modify `iris`to have its numerical values in units of inches rather than centimeters (what it is now).
+```{r}
+iris %>% mutate_if(is.numeric, funs(. * 0.394)) %>% head ## is.numeric is used as our predicate because we only want to modify the numerical columns
+```
+
+
+#### `transmute`
+
+In your own words, what is the difference between `mutate` and `transmute`?
+
+`mutate` will modify existing columns or tack on new ones, but won't get rid of any columns. 
+`transmute` will only keep the modified/added columns.
+
+### `summarise`, `summary`
+
+Use `summarise` to compute the largest petal lengths and petal widths in the `iris` dataset. (For the particularily adventurous, try to figure out how to use `summarise_at` for this problem). 
+```{r}
+## Basic Solution
+iris %>% summarise(`Largest Petal Length` = max(Petal.Length), `Largest Petal Width` = max(Petal.Width)) 
+
+## Advanced Solution
+iris %>% summarise_at(vars(starts_with("Petal")), funs(Largest = max))
+```
+
+
+In the above problem, what is the **summary function** you used to calculate the summary columns? 
+
+The summary function used above was `max`.
+
+In your own words, what is `summary` useful for? 
+
+`summary` can be used to conduct a quick EDA of a dataset, as it gives a five-number summary and other information for each column.
+
+In your own words, what is the difference between `summarise` and `summary`?
+
+`summarise` is a `dplyr` verb used to apply summary functions to a dataframe.
+`summary` is a base R function used to print out a quick summary statement about a dataframe or model.
+
+### Grouped Data
+
+In your own words, what is the purpose or function of grouping data?
+
+Grouping data allows you to apply window or summary functions by group, rather than to the dataset as a whole.
+
+Find the largest petal lengths and petal widths in the `iris` dataset **for each Species**. (Again, for the particularily adventurous, try to figure out how to use `summarise_at` for this problem).
+```{r}
+## Basic Solution
+iris %>% group_by(Species) %>% summarise(`Largest Petal Length` = max(Petal.Length), `Largest Petal Width` = max(Petal.Width))
+
+## Advanced Solution
+iris %>% group_by(Species) %>% summarise_at(vars(starts_with("Petal")), funs(Largest = max))
+```
+
+
+Use grouped `mutate` and the `sort` function to sort the flowers in `iris` by `Petal.Length`, within their Species.
+```{r}
+iris %>% group_by(Species) %>% mutate(Petal.Length = sort(Petal.Length)) 
+```
+
+
+### Combining Datasets
+
+In your own words, what is the difference between **binds** and **joins**?
+
+A **bind** will glue the columns or rows of two dataframes together, as they are. 
+A **join** will also glue together columns, but only after matching up the rows using some common *key column* between the two dataframes. 
+
+Bind the following two dataframes into a single dataframe, row-wise:
+```{r}
+a <- data.frame(ID = 1:3, Name = c("Alice", "Bob", "Catherine"), Age = c(19, 19, 21))
+b <- data.frame(ID = 4:5, Name = c("Dennis", "Edward"), Age = c(22, 20))
+bind_rows(a, b)
+```
+
+Bind the following three dataframes into a single dataframe, column-wise:
+```{r}
+a <- data.frame(ID = 1:5, Name = c("Alice", "Bob", "Catherine", "Dennis", "Edward"))
+b <- data.frame(Age = c(19, 19, 21, 22, 20))
+bind_cols(a, b)
+```
+
+Join the following two dataframes:
+```{r}
+a <- data.frame(ID = 1:5, Name = c("Alice", "Bob", "Catherine", "Dennis", "Edward"))
+b <- data.frame(ID = c(5, 3, 4, 2, 1), Age = c(20, 21, 22, 19, 19))
+inner_join(a, b)
+```
+
+In your own words, what is the difference between a **left join** and an **inner join**?
+
+A **left join** will keep all the rows in the left dataframe, filling any missing keys in the right data with `NA`. 
+In contrast, an **inner join** will only keep the rows that have matching keys in both the left and the right dataframes.
+
+## `tidyr`
+
+Make a small tidy dataset.
+```{r}
+data.frame(`Package Name` = c("dplyr", "tidyr", "readr", "readxl", "purrr"),
+           `Description` = c("Used to manipulate dataframes", "Used to clean and wrangle data into a tidy form", 
+                             "Used to read text files as dataframes", "Used to read Excel spreadsheets as dataframes", "Used for functional programming in R"))
+```
+
+
+Make a small wide dataset.
+```{r}
+data.frame(`dplyr` = "Used to manipulate dataframes", 
+           `tidyr` = "Used to clean and wrangle data into a tidy form", 
+           `readr` = "Used to read text files as dataframes", 
+           `readxl` = "Used to read Excel spreadsheets as dataframes", 
+           `purrr` = "Used for functional programming in R")
+```
+
+
+### `gather`
+
+Tidy the following dataset and save it to the variable `tidy_practice_df`:
+```{r, warning = F}
+wide_practice_df <- data.frame(`CS61A` = "A-",`S134` = "B-", `S133` = "A", `S135` = "B+", check.names = F)
+wide_practice_df %>% gather(Course, Grade) -> tidy_practice_df
+tidy_practice_df ## Just to show solution dataframe
+```
+
+### `spread`
+
+Now, take your `tidy_practice_df` and put it back into the wide format of `wide_practice_df`.
+```{r}
+tidy_practice_df %>% spread(Course, Grade)
+```
+
+
+### NA Values
+
+What does `NA` represent? Why are `NA` values "bad"?
+
+`NA` values represent cells where the data was *Not Available*. `NA` values are infectious - any operation that "touches" an `NA` value will usually just return `NA`.
+
+Clean out the `NA` values in the following dataset, in two ways.
+
+```{r}
+dirty_practice_df <- data.frame(A = rnorm(5, 10, 5), B = c(T, NA, NA, NA, F))
+
+## tidyr approach
+dirty_practice_df %>% drop_na
+
+## dplyr approach
+dirty_practice_df %>% filter(! is.na(B))
+
+## dplyr approach (general)
+dirty_practice_df %>% filter_all(all_vars(! is.na(.)))
+```
+
+# Data Import 
+
+## `readr` & `readxl`
+
+Use `readr` to read in `data/wellcome_apc_articles.csv`. You don't need to worry about cleaning - that will be the topic of the first mini-project.
+```{r}
+articles <- read_csv("data/wellcome_apc_articles.csv")
+head(articles)
+```
+
+
+Use `readxl` to read in `data/plant-ants.xls`. You don't need to worry about tidying - that will be the topic of the second mini-project. (*Hint: Use the `range` argument*)
+```{r}
+plantants <- read_excel("data/plant-ants.xls", sheet = 1, range = "A3:R28") ## Range determined by viewing the file in some spreadsheet software
+head(plantants)
+```
+
+
+## Column Types
+
+What is a **factor**? How does it differ from the **character** type?
+
+**factor** is R's data type for categorical labels. It is designed for a relatively small number of (potentially ordered) discrete categories.
+In contrast, **character** is R's data type for *any* text, whether that text is a label, key, category, or anything else. 
+
+What are the two ways to specify the `col_types` argument in `readr` functions?
+
+There are two ways to specify `col_types` in `readr`, one with `cols` & the `col_*` functions, the other with string abbreviations:   
+  - `col_types = cols(Hello = col_guess(), World = col_date())`     
+  - `col_types = "?D"`
+
+# Functional Programming in R (`purrr`)
+
+In your own words, what is **functional programming**?
+
+**Functional programming** is a style of programming that focuses on applying functions generically to objects or lists of objects. 
+
+## The `map` Family
+
+Make a function called `quadratic_solver(a, b, c)` that finds the larger root of a quadratic polynomial.
+
+```{r}
+quadratic_solver <- function(a,b,c) {
+  (-b + sqrt(b^2 - 4*a*c))/(2*a)
+}
+```
+
+
+Use `quadratic_solver` and one of the `pmap_*` functions to output a vector of the larger roots of the following polynomials:   
+$\{6x^2 + 12x - 15, x^2 - 3x - 90, x^2 + x - 1\}$
+
+```{r}
+a_list <- list(6, 1, 1)
+b_list <- list(12, -3, 1)
+c_list <- list(-15, -90, -1)
+poly_list <- list(a_list, b_list, c_list) 
+pmap_dbl(poly_list, quadratic_solver) ## pmap applies a function to a list of lists. pmap_dbl makes it return a double vector
+```
+
+
+## More `purrr`
+
+Make a function called `factorial` that uses `multiply_by` and `reduce` to find the factorial of a number. (Recall that `factorial(4)` returns $(((1 \times 2) \times 3) \times 4)$.)
+```{r}
+factorial <- function(n) {
+  reduce(1:n, multiply_by)
+}
+```
+
+
+Challenge question! `purrr` has `map_*` functions for dataframes too! Using `?<func>` to check the documentation of the functions used below, and see if you can describe what exactly is happening in each section of the pipe. 
+```{r}
+iris %>% ## Take the iris dataset,
+  split(.$Species) %>% ## then split it into three dataframes by the `Species` column,
+  map_dfr(function(df){df %>%  ## And apply the following function to each Species dataframe, before row_binding them back together.
+      summarise_if(is.numeric, ## Summarize each numeric column
+                   sum)},      ## as the sum of its entries
+      .id = "f")               ## In the binded dataframe, name the Species column, "f"
+```
+
+# Mini-projects
+
+The best way to get better at data manipulation, data import, and data cleaning is by practicing with wild datasets! These two miniature data science projects are designed to give you experience cleaning and tidying datasets with `dplyr` and `tidyr`. 
+
+## Cleaning the `articles` dataset
+
+In some spreadsheet software, view `data/wellcome_apce_articles.csv`. Read and clean this dataset. You will need to use heavily use `readr`, `dplyr`, `tidyr`, and even `stringr` to accomplish this. For tips, review all the functions in [`r2`](r2.html). Feel free to email `contact@arun.run` with any questions or for hints.
+
+## Tidying the `plantants` dataset
+
+In some spreadsheet software, view `data/plant-ants.xls`. Read and clean this dataset. Additionally, put it into a `tidy` format. You will need to use heavily use `readxl`, `dplyr`, `tidyr`. For tips, review all the functions in [`r2`](r2.html). Feel free to email `contact@arun.run` with any questions or for hints.

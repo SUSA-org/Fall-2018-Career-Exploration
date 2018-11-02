@@ -1,0 +1,285 @@
+---
+title: Introduction to R
+subtitle: "Part 2: Data Wrangling with the `tidyverse`"
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+```{r, echo = F}
+knitr::opts_chunk$set(eval = F)
+```
+
+# About this Document
+This is the associated workbook for the [r2](r2.html) tutorial on R programming and tidyverse. Using RStudio, replace each ` > TODO ` with a code chunk that answers the associated problem. Then, run the chunk to verify your answers. Some problems require a non-code answer, so simply replace ` > TODO ` with the correct textual answer.
+
+# Data Wranging
+
+## `dplyr`
+
+### `head`, `View`, `arrange`
+
+A pop-quiz on `%>%` from the `magrittr` package! Write a command to view the `iris` dataset in two ways, one with piping and one without. What do you notice about the tab titles of each?
+
+> TODO
+
+Use `head` to read the first ten lines of the `iris` dataset.
+
+> TODO
+
+Read the documentation of `head`. How could we easily see the **last** ten lines of the `iris` dataset?
+
+> TODO
+
+Using `View`, see if you can find out how many entries are in the `iris` dataset.
+
+> TODO
+
+Using `desc` and `tail`, find an alternative command to find the shortest six petals in the `iris` dataset.
+
+> TODO
+
+### Dataframe Subsetting
+
+#### Row Selection (`sample_*`, `slice`, `filter`)
+
+Read the documentation for `sample_n` to determine how to sample **with replacement**. Using the following dataframe, simulate ten rolls of a die.
+```{r}
+dice <- data.frame(Dots = 1:6)
+## TODO
+```
+
+Use `sample_n` and `nrow` (outputs the number of rows in a dataframe) to write `scramble`, a function that takes in a dataframe and outputs the same dataframe in a scrambled order.
+
+> TODO
+
+Using `slice`, write `my_head`, a function that operates identically to the default behavior of the `head` function. Use the following function header:
+```{r}
+my_head <- function(df, size = 6) {
+  ## TODO
+}
+```
+
+
+Select only the setosa flowers in `iris` with Sepal.Length's over 5.
+
+> TODO
+
+#### Column Selection (`select`, `rename`, `pull`)
+
+Use `select` to make a sub-dataframe of `iris` with only the columns about lengths.
+
+> TODO
+
+Rename the columns of `iris` to have more natural grammar. (Read: spaces rather than periods). 
+
+> TODO
+
+In your own words, what is the difference betwee `select` and `pull`?
+
+> TODO
+
+In `r2`, what was the difference in behavior between using `select` vs. using `rename` on the `iris` dataset? How would you fix the `select` statement to work identically in this case?
+
+> TODO
+
+Using `select`, write `my_rename`, a function that operates (nearly) identically to the default behavior of the `rename` function. Use the following function header:
+```{r}
+my_rename <- function(df, ...) {
+  ## TODO
+}
+```
+
+### Adding & Modifying Columns (`mutate`, `transmute`)
+
+#### `mutate`
+
+What are the two uses for `mutate`? 
+
+> TODO
+
+Use `mutate` to make a two new columns in `iris`, 1) `Petal/Sepal Width Ratio`, the ratio between `Petal.Width` and `Sepal.Width` and 2) `Petal Area`, using `Petal.Width` and `Petal.Length`.
+
+> TODO
+
+In the above problem, what is the window function you used to calculate `Petal/Sepal Width Ratio`? What is the window function used to calculate `Petal Area`?
+
+> TODO
+
+Challenge question! Look up the documentation for `mutate_if`, and use it to modify `iris`to have its numerical values in units of inches rather than centimeters (what it is now).
+
+> TODO
+
+#### `transmute`
+
+In your own words, what is the difference between `mutate` and `transmute`?
+
+> TODO 
+
+### `summarise`, `summary`
+
+Use `summarise` to compute the largest petal lengths and petal widths in the `iris` dataset. (For the particularily adventurous, try to figure out how to use `summarise_at` for this problem). 
+
+> TODO 
+
+In the above problem, what is the **summary function** you used to calculate the summary columns? 
+
+> TODO
+
+In your own words, what is `summary` useful for? 
+
+> TODO 
+
+In your own words, what is the difference between `summarise` and `summary`?
+
+> TODO
+
+### Grouped Data
+
+In your own words, what is the purpose or function of grouping data?
+
+> TODO
+
+Find the largest petal lengths and petal widths in the `iris` dataset **for each Species**. (Again, for the particularily adventurous, try to figure out how to use `summarise_at` for this problem).
+
+> TODO
+
+Use grouped `mutate` and the `sort` function to sort the flowers in `iris` by `Petal.Length`, within their Species.
+
+> TODO
+
+### Combining Datasets
+
+In your own words, what is the difference between **binds** and **joins**?
+
+> TODO
+
+Bind the following two dataframes into a single dataframe, row-wise:
+```{r}
+a <- data.frame(ID = 1:3, Name = c("Alice", "Bob", "Catherine"), Age = c(19, 19, 21))
+b <- data.frame(ID = 4:5, Name = c("Dennis", "Edward"), Age = c(22, 20))
+## TODO
+```
+
+Bind the following three dataframes into a single dataframe, column-wise:
+```{r}
+a <- data.frame(ID = 1:5, Name = c("Alice", "Bob", "Catherine", "Dennis", "Edward"))
+b <- data.frame(Age = c(19, 19, 21, 22, 20))
+## TODO
+```
+
+Join the following two dataframes:
+```{r}
+a <- data.frame(ID = 1:5, Name = c("Alice", "Bob", "Catherine", "Dennis", "Edward"))
+b <- data.frame(ID = c(5, 3, 4, 2, 1), Age = c(20, 21, 22, 19, 19))
+## TODO
+```
+
+In your own words, what is the difference between a **left join** and an **inner join**?
+
+> TODO
+
+## `tidyr`
+
+Make a small tidy dataset.
+
+> TODO
+
+Make a small wide dataset.
+
+> TODO 
+
+### `gather`
+
+Tidy the following dataset and save it to the variable `tidy_practice_df`:
+```{r, warning = F}
+wide_practice_df <- data.frame(`CS61A` = "A-",`S134` = "B-", `S133` = "A", `S135` = "B+", check.names = F)
+## TODO
+```
+
+### `spread`
+
+Now, take your `tidy_practice_df` and put it back into the wide format of `wide_practice_df`.
+
+> TODO
+
+### NA Values
+
+What does `NA` represent? Why are `NA` values "bad"?
+
+> TODO
+
+Clean out the `NA` values in the following dataset, in two ways.
+
+```{r}
+dirty_practice_df <- data.frame(A = rnorm(5, 10, 5), B = c(T, NA, NA, NA, F))
+## TODO: tidyr approach
+## TODO: dplyr approach
+```
+
+# Data Import 
+
+## `readr` & `readxl`
+
+Use `readr` to read in `data/wellcome_apc_articles.csv`. You don't need to worry about cleaning - that will be the topic of the first mini-project.
+
+> TODO 
+
+Use `readxl` to read in `data/plant-ants.xls`. You don't need to worry about tidying - that will be the topic of the second mini-project. (*Hint: Use the `range` argument*)
+
+> TODO
+
+## Column Types
+
+What is a **factor**? How does it differ from the **character** type?
+
+> TODO
+
+What are the two ways to specify the `col_types` argument in `readr` functions?
+
+> TODO
+
+# Functional Programming in R (`purrr`)
+
+In your own words, what is **functional programming**?
+
+> TODO
+
+## The `map` Family
+
+Make a function called `quadratic_solver(a, b, c)` that finds the larger root of a quadratic polynomial.
+
+> TODO
+
+Use `quadratic_solver` and one of the `pmap_*` functions to output a vector of the larger roots of the following polynomials:   
+$\{6x^2 + 12x - 15, x^2 - 3x - 90, x^2 + x - 1\}$
+
+> TODO
+
+## More `purrr`
+
+Make a function called `factorial` that uses `multiply_by` and `reduce` to find the factorial of a number. (Recall that `factorial(4)` returns $(((1 \times 2) \times 3) \times 4)$.)
+
+> TODO
+
+Challenge question! `purrr` has `map_*` functions for dataframes too! Using `?<func>` to check the documentation of the functions used below, and see if you can describe what exactly is happening in each section of the pipe. 
+```{r}
+iris %>% split(.$Species) %>% map_dfr(function(df){df %>% summarise_if(is.numeric, sum)}, .id = "f")
+```
+
+> TODO
+
+# Mini-projects
+
+The best way to get better at data manipulation, data import, and data cleaning is by practicing with wild datasets! These two miniature data science projects are designed to give you experience cleaning and tidying datasets with `dplyr` and `tidyr`. 
+
+## Cleaning the `articles` dataset
+
+In some spreadsheet software, view `data/wellcome_apce_articles.csv`. Read and clean this dataset. You will need to use heavily use `readr`, `dplyr`, `tidyr`, and even `stringr` to accomplish this. For tips, review all the functions in [`r2`](r2.html). Feel free to email `contact@arun.run` with any questions or for hints.
+
+## Tidying the `plantants` dataset
+
+In some spreadsheet software, view `data/plant-ants.xls`. Read and clean this dataset. Additionally, put it into a `tidy` format. You will need to use heavily use `readxl`, `dplyr`, `tidyr`. For tips, review all the functions in [`r2`](r2.html). Feel free to email `contact@arun.run` with any questions or for hints.

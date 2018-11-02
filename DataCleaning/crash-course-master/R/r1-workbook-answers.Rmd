@@ -1,0 +1,400 @@
+---
+title: Introduction to R
+subtitle: "Part 1: Base R & tidyverse (Associated Workbook Answers)" 
+author: "Hosted by and maintained by the [Statistics Undergraduate Students Association (SUSA)](https://susa.berkeley.edu). Originally authored by Arun Ramamurthy."
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+```{r, echo = F}
+knitr::opts_chunk$set(eval = T)
+library(magrittr);library(stringr)
+```
+
+# About this Document
+This is the answer manual to the associated workbook for the [r1](r1.html) tutorial on R programming, [r1-workbook](r1-workbook.Rmd).
+
+# R Markdown
+Make an empty chunk below:  
+
+```{r}
+
+```
+
+
+Make and run a chunk that outputs "Hello SUSA!", using the `print` function:  
+
+```{r}
+print("Hello SUSA!")
+```
+
+
+How do you make text bold in R Markdown? How would you make text italics in R Markdown? (The R Markdown in the [Additional Reading section](r1.html#additional-reading) should be helpful here.)  
+
+*Hello SUSA!*  
+**Hello SUSA!**
+
+# Base R 
+## Basic R
+### Syntax
+Comment out the a single line in the following code chunk, so that the output is `12` rather than `20`.
+```{r}
+a = 3 + 3 * 3
+#a = 4 * 4 + 4
+a
+``` 
+
+### Expressions
+Write an arithmetic expression to find the mean of the first five positive integers.  
+```{r}
+(1+2+3+4+5)/5
+```
+
+
+Write an arithmetic expression that uses the modulo and equality operators to test if a number is even or odd.   
+```{r}
+num = 3
+(num %% 2) > 0 # Outputs TRUE for odd, FALSE for even. Could've been switched... QUIZ: How?
+```
+
+ 
+### Variables & Assignment
+Make a set of variable assignments to find the larger root of $x^2 + 4x - 2$
+```{r}
+a <- 1
+b <- 4
+c <- -2
+```
+```{r}
+(-b+sqrt(b^2-4*a*c))/(2*a)
+```
+Make a variable named "susa magic" that evaluates to the value you computed above, without typing any numbers.
+```{r}
+`susa magic` <- (-b+sqrt(b^2-4*a*c))/(2*a)
+`susa magic` # Just to show output
+```
+
+
+### Atomic Objects
+What are the two properties of atomic objects in R?
+1. Atomic objects are **flat**. That is, they cannot be reduced further in complexity.
+2. Atomic objects are of the same **type**, either `numeric`, `logical`, or `character`.
+
+
+#### Types
+
+##### Numerics
+Create a numeric for one million using scientific notation.
+```{r}
+mill <- 1e6
+mill # Just to show output
+```
+
+
+What type is `pi`?
+`pi` is of type `numeric`. We can verify this in the following code chunk:
+```{r}
+class(pi)
+```
+
+
+##### Logicals
+
+What numeric quantity is associated with `FALSE`?
+`0` is equivalent to `FALSE`. We can verify this in the following code chunk:
+```{r}
+0 == F
+```
+
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+0 | T
+```
+Since `TRUE` or'ed with `FALSE` is `TRUE`, and `0` is equivalent to `FALSE`, the output should be `TRUE`.
+
+##### Characters
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+'pi' == pi
+```
+Here, we highlight the difference between `characters` and `numerics`. Since `'pi'` is of type `character` and `pi` is of type `numeric`, they cannot be equal. So the output should be `FALSE`.
+
+What does the `paste` function do?
+
+The `paste` function will output a `character` string of all its arguments, by default separated by a ` ` (space).
+
+#### Vectors
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+c(1) == 1
+```
+
+This code chunk highlights that single-element vectors are identical to just single elements. So, the output should be `TRUE`.
+
+##### Vector Basics
+
+Name two uses of the `c` function.
+1. `c` is used to create vectors out of atomic objects.  
+2. `c` is used to concatenate multiple vectors into a single flat vector.  
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+length(c(1,10,2,3,1))
+```
+There are 5 elements in the vector, and `length` will return the number of elements in the vector passed to it. So, the output should be 5.
+
+##### Vectorized Functionality
+
+Use a vector and an operation to find the first 10 powers of 2.
+```{r}
+powers <- 1:10
+2^powers
+```
+
+
+##### Flattening
+
+**Without evaluating it in R first**, what is the output of the following?
+```{r}
+c(0, "TRUE", FALSE)
+```
+Since flattening will cast everything to `character` if a single `character` element is present, we expect the output to be a `character` vector with three elements, `"0"`, `"TRUE"`, and `"FALSE"`. Since the `character` casting occurs before any numerics are turned into logicals, 0 is not converted to `FALSE` before it's converted to a character.
+
+##### Subsetting Vectors
+
+What are the three ways to subset vectors?
+1. `v[selection]`, where `selection` is a numeric vector of the indices of the elements we wish to keep.  
+2. `v[selection]`, where `selection` is a logical vector indicating which elements of `v` we wish to keep.  
+3. `v[selection]`, where `selection` is a character vector of the names of the elements we wish to keep.  
+
+Use all three ways to subset the vector `v` to get just the first and last values:
+```{r}
+v <- c("red" = 4, "blue" = 0, "green" = 2)
+v[c(1,3)] # Using Method 1 (numeric selection)
+v[c(T,F,T)] # Using Method 2 (logical selection)
+v[c("red", "green")] # Using Method 3 (character selection)
+```
+
+Add a line of code to the chunk below to output all the elements in the vector that are even, without manually specifying their indicies. You will find the modulus operator helpful here.
+```{r}
+v <- 1:100
+v[v %% 2 == 0] # Using Method 2 (logical)
+```
+
+### Lists
+
+What is the difference between a vector and a list?
+A vector is **flat** and only contains elements of the **same type**. However, a list can contain elements of any types, including other lists, and so neither has to be flat nor all of the same type.
+
+
+Make a list containing your favorite color, your age, and a logical indicating if you have pets or not.
+```{r}
+my_list <- list("green", 20, F)
+my_list # Just to show output
+```
+
+
+Now, put that list into a new list, along with your current home address. How many elements does your list have?
+```{r}
+my_other_list <- list(my_list, "2607 Hillegass Avenue")
+length(my_other_list) # Showcases that length is only at the top-level
+# So, the length is 2 (my_list and my home address), not accounting for the length of my_list itself
+```
+
+
+Extract your favorite color from this new list.
+```{r}
+my_other_list[[1]][[1]] # First gets the first element of my_other_list (my_list), then gets the first element of that (green)
+```
+
+
+### Functions
+
+What is the syntax to use a function in R?
+
+E.g. `f(x, a = "something", b = 3)`
+
+#### Using Functions
+
+Find the square root of $e$. You will find the `exp` function useful here.
+```{r}
+sqrt(exp(1))
+```
+
+
+What is the default value of the `digits` argument of the `round` function? 
+
+By running `?round` in the R Console, and looking at the Usage section, we find that it is `digits = 0`.
+
+#### Writing Functions
+
+Write a function to test if a number is odd. Use it to determine all the odd values of the first 20 squares.
+```{r}
+is_odd <- function(n){n %% 2 > 0}
+first_twenty_squares <- (1:20)^2
+first_twenty_squares[is_odd(first_twenty_squares)] # Using Method 1 (numeric selection)
+```
+
+Write a function `susa(x, a, b)` which returns $x^{\frac{a}{b}}$. By default, it should return the square root of `x`. 
+```{r}
+susa <- function(x, a = 1, b = 2) {x^(a/b)}
+```
+
+
+## Dataframes
+
+### Constructing Dataframes
+
+Make a dataframe containing the first name, last name, favorite ice cream flavor, and approximate height of four other CX members. Include yourself in this dataframe for a total of five entries.
+```{r}
+`First Names` <- c("aRun", "Patrick", "Alex", "Dennis", "Lucas")
+`Last Names` <- c("Ramamurthy", "Chao", "Chan", "Yang", "the CX Pledge Master")
+`Favorite Ice Cream Flavor` <- c("Mint Chocolate Chip", "Vanilla", "Peach", "Chocolate", "Ice")
+Heights <- c(72, 20, 69, 100, 4)
+cx_df <- data.frame(`First Names`, `Last Names`, `Favorite Ice Cream Flavor`, Heights)
+head(cx_df) # Just to show output
+```
+
+
+Verify the types and structure of your dataframe.
+```{r}
+str(cx_df)
+```
+
+
+### Subsetting Dataframes
+
+Using the dataframe from the previous section, make a subset of the dataframe that only contains the name information.
+```{r}
+cx_df_namesonly <- cx_df[, 1:2] # Notice: second argument is for column selection
+head(cx_df_namesonly) # Just to show output
+```
+
+
+Extract the row associated with you from your dataframe.
+```{r}
+cx_df[1,] # Notice: first argument is for row selection
+```
+
+## RDS Files
+
+Read the documentation of `saveRDS`. What are its arguments?
+
+Running `?saveRDS`, we find that the arguments are:
+- `object`, the object you are saving into an RDS file  
+- `file`, the file name for the new RDS file you are creating  
+- `ascii`  
+- `version`  
+- `compress`  
+- `refhook`  
+
+Read the documentation of `readRDS`. What are its arguments?
+
+Running `?readRDS`, we find that the arguments are:
+- `file`, the file name of the RDS file you are reading   
+- `refhook`  
+
+Using `saveRDS` and `readRDS`, trade your dataframe from above with the person next to you via Slack. Read their dataframe and check its contents.
+```{r, eval = F}
+saveRDS(cx_df, "test.RDS")
+cx_df_again <- readRDS("test.RDS")
+```
+
+
+# Installing & Using Packages
+
+In your own words, what is a **package**?
+A **package** is an addition to the Base R functions, usually encapsulating a set of specialized functions for some task(s).
+
+## Installing Packages
+
+When should you use `install.packages`? When should you use `library`?
+Use `install.packages` when downloading and installing a package for the first time on a particular computer.
+Use `library` when loading a package for its first use in a particular file.
+
+Install and load the `ubeR` package, a package that allows you to use Uber's API to look at your ride history and even request an Uber, all within R.
+```{r, eval = F}
+install.packages("ubeR")
+library(ubeR)
+```
+
+
+## `magrittr`
+
+In your own words, what is a **pipe**? Why is it useful?
+
+The pipe (`%>%`) is used to "linearize" nested function calls, to make them easier to easier to read. 
+
+Name three aliases included in the `magrittr` package that weren't included in `r1`.
+
+By running `?multiply_by` in the R Console, some answers include:
+* is_weakly_less_than  
+* extract2   
+* is_in  
+
+Using piping, reconstruct the Quadratic Formula above to find the larger root of $16x^2 + 14x - 20$.
+```{r}
+a <- 16
+b <- 14
+c <- -20
+- b %>% add(
+  sqrt(
+    b %>% raise_to_power(2) %>% 
+      subtract(4 %>% multiply_by(a) %>% multiply_by(c)))) %>%
+  divide_by(2 %>% multiply_by(a))
+## There are multiple possible answers to this problem - it's just intended to give you some practice with piping
+```
+
+In your own words, what does the `%<>%` pipe do?
+
+The `%<>%` pipe will operate as the normal `%>%` pipe does, but sets the variable to its left to its final output when finished.
+
+## `stringr`
+
+There is another function we learned early on in `r1` that operates identically to `str_length`. What is that function?
+`nchar`
+
+Use `str_sub` to edit the string below to read `"(Your name) is awesome!"`
+```{r}
+x <- "CX is awesome."
+str_sub(x, start = 1, end = 2) <- "R Programming"
+x # Just to show output
+```
+
+Read the documentation for `str_trim`. Then, use `str_trim` to edit the string below to read `"    Hello world!"`
+```{r}
+x <- "    Hello world!        "
+x %>% str_trim(side = "right")
+```
+
+Use `str_detect` to make a new vector of all the strings in `x` that contain the letter `a`.
+```{r}
+x <- c("asdf", "have a great day!", "SUSA", "susa", "cx", "cx is awesome")
+x_a <- x[str_detect(x, pattern = "a")]
+x_a # Just to show output
+```
+
+Use `stringr` to replace all the vowels in your name with capital vowels. The adventurous of you could use the regex guide in the [Additional Reading section](r1.html#additional-reading), but repeated calls to `str_replace_all` would work as well.
+
+`str_replace_all` solution:
+```{r}
+my_name <- "arun ramamurthy"
+my_name %>% 
+  str_replace_all(pattern = "a", replacement = "A") %>%
+  str_replace_all(pattern = "e", replacement = "E") %>%
+  str_replace_all(pattern = "i", replacement = "I") %>%
+  str_replace_all(pattern = "o", replacement = "O") %>%
+  str_replace_all(pattern = "u", replacement = "U") 
+```
+
+Regex solution:
+```{r}
+my_name <- "arun ramamurthy"
+my_name %>% str_replace_all(pattern = "[aeiou]", toupper)
+```
